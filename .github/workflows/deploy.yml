@@ -1,0 +1,23 @@
+name: Deploy to Hugging Face Spaces
+
+on:
+  push:
+    branches:
+      - main  # Change if using a different branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+
+      - name: Push to Hugging Face Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          huggingface-cli repo create UJCTracker --organization MRichardson25 --private --type space
+          huggingface-cli upload --repo-type space --token $HF_TOKEN --path . --repo-id MRichardson25/UJCTracker
