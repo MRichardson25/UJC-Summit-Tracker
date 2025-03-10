@@ -3,7 +3,7 @@ name: Deploy to Hugging Face Spaces
 on:
   push:
     branches:
-      - main  # Change if using a different branch
+      - main  # Change this if you use a different branch
 
 jobs:
   deploy:
@@ -19,5 +19,4 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          huggingface-cli repo create UJCTracker --organization MRichardson25 --private --type space
           huggingface-cli upload --repo-type space --token $HF_TOKEN --path . --repo-id MRichardson25/UJCTracker
