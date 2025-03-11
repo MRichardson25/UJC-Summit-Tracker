@@ -3,7 +3,7 @@ name: Deploy to Hugging Face Spaces
 on:
   push:
     branches:
-      - main  # Change this if you use a different branch
+      - main  # Change this if using another branch
 
 jobs:
   deploy:
@@ -19,4 +19,11 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          huggingface-cli upload --repo-type space --token $HF_TOKEN --path . --repo-id MRichardson25/UJCTracker
+          git config --global user.email "mrichardson@rocnation.com"
+          git config --global user.name "MRichardson25"
+          git clone https://huggingface.co/spaces/MRichardson25/UJCTracker
+          rsync -av --exclude '.git' ./ UJCTracker/
+          cd UJCTracker
+          git add .
+          git commit -m "Update from GitHub Actions"
+          git push origin main
