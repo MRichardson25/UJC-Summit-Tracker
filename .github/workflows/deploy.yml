@@ -3,7 +3,7 @@ name: Deploy to Hugging Face Spaces
 on:
   push:
     branches:
-      - main  # Change this if using another branch
+      - main  # Change if using another branch
 
 jobs:
   deploy:
@@ -12,16 +12,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install huggingface_hub
+      - name: Install dependencies
         run: pip install huggingface_hub
 
-      - name: Push to Hugging Face Space
+      - name: Clone Hugging Face Space with authentication
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           git config --global user.email "mrichardson@rocnation.com"
           git config --global user.name "MRichardson25"
-          git clone https://huggingface.co/spaces/MRichardson25/UJCTracker
+          git clone https://MRichardson25:$HF_TOKEN@huggingface.co/spaces/MRichardson25/UJCTracker
           rsync -av --exclude '.git' ./ UJCTracker/
           cd UJCTracker
           git add .
