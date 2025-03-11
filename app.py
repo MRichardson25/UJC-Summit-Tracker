@@ -72,7 +72,7 @@ with tab1:
     st.title("🎟️ Event Tracker Dashboard")
 
     # Top Metrics (Like Total Balance and Monthly Budget)
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([0.8, 0.2])
     with col1:
         st.metric("Total Ticket Sales", f"{total_sales:,.0f}")
         st.progress(progress / 100)
@@ -186,7 +186,7 @@ with tab1:
     #ambassadors_registered = df_filtered[df_filtered['Did a UJC Ambassador Invite you to the Summit?'] == "Ambassador"]["registrations"].count()
     ambassadors_registered = df_survey[~df_survey['Did a UJC Ambassador Invite you to the Summit?'].astype(str).str.lower().isin(invalid_entries)].shape[0]
     #eventbrite_views = df_filtered["page_views"].sum()  # Assuming page_views column exists
-    eventbrite_views = 0
+    eventbrite_views = 4230
 
 
     # Custom CSS for styling
@@ -387,7 +387,7 @@ with tab1:
     )
 
     # Create Streamlit UI
-    col1, col2 = st.columns([2, 1])  # Left column (map) is twice as wide as right column (chart)
+    col1, col2 = st.columns(2)  # Left column (map) is twice as wide as right column (chart)
     with col1:
         st.title("Event Registrations by Location")
 
@@ -529,7 +529,7 @@ with tab2:
     )
 
     # Manually set all bars to blue
-    fig4.update_traces(marker=dict(color="blue"))
+    fig4.update_traces(marker=dict(color="blue"),textangle=0)
 
     # Format chart aesthetics
     fig4.update_layout(
@@ -542,6 +542,7 @@ with tab2:
 
     # Show chart in Streamlit
     st.plotly_chart(fig4, use_container_width=True)
+    
 
 
     from st_aggrid import AgGrid, GridOptionsBuilder
@@ -593,103 +594,3 @@ with tab2:
         fit_columns_on_grid_load=True,  # ✅ Auto-adjust columns
         theme="balham",  # ✅ Set grid theme
         )
-
-
-    # world_map = folium.Map(location=[37.8, -96], zoom_start=4)  # Centers on the US
-
-
-
-    # # Add circle markers for each location
-    # for _, row in df_map.iterrows():
-    #     folium.CircleMarker(
-    #         location=[row["Lat"], row["Lon"]],
-    #         radius=max(2, row["Count"] * 0.2),  # ✅ Scales down the size significantly
-    #         color="blue",
-    #         fill=True,
-    #         fill_color="blue",
-    #         fill_opacity=0.5,
-    #         popup=f"{row['StateCode']}: {row['Count']} attendees",
-    #     ).add_to(world_map)
-
-    # # Display map in Streamlit
-    # st_folium(world_map, width=800, height=500)
-
-
-
-    # # Key Insights (Like Savings Goal)
-    # st.subheader("📊 Key Event Metrics")
-    # col1, col2, col3, col4 = st.columns(4)
-    # col1.metric("Returning Attendees", returning_attendees)
-    # col2.metric("New Students", new_students)
-    # col3.metric("Ambassador Registrations", ambassadors)
-    # col4.metric("Page Views", f"{page_views:,}")
-
-    # # Sales Trend Chart (Like Savings Statistic)
-    # st.subheader("📈 Ticket Sales & Web Traffic Over Time")
-    # sales_df = pd.DataFrame({"Date": days, "Ticket Sales": ticket_sales, "Web Traffic": web_traffic})
-    # fig = px.line(sales_df, x="Date", y=["Ticket Sales", "Web Traffic"], title="Event Performance Trends")
-    # st.plotly_chart(fig, use_container_width=True)
-
-    # # Ad Performance Table
-    # st.subheader("📢 Paid Promotion Performance")
-    # st.dataframe(ad_data)
-
-    # # Recent Transactions (Like Recent Transactions)
-    # st.subheader("💳 Recent Ticket Purchases")
-    # recent_transactions = pd.DataFrame({
-    #     "Name": ["John Doe", "Jane Smith", "Alex Johnson", "Emily Davis"],
-    #     "Date": pd.to_datetime(["2025-03-01", "2025-02-28", "2025-02-27", "2025-02-26"]),
-    #     "Transaction": ["Credit Card", "Bank Transfer", "PayPal", "Crypto"],
-    #     "Amount": ["$120.00", "$85.50", "$150.00", "$99.99"],
-    #     "Status": ["Completed", "Pending", "Completed", "Failed"]
-    # })
-    # st.dataframe(recent_transactions)
-
-    # st.write("📌 *This dashboard is a prototype and uses simulated data.*")
-    # --------------------------------------------------------------------------------------------------
-    #State 
-
-
-    # # Set Streamlit Page Config
-    # st.set_page_config(page_title="US Event Registrations Map", layout="wide")
-
-    # # Sample Data: Event Registrations by U.S. State
-    # state_data = {
-    #     "State": ["California", "Texas", "Florida", "New York", "Illinois", "Pennsylvania", "Ohio", "Georgia", "North Carolina", "Michigan"],
-    #     "Abbreviation": ["CA", "TX", "FL", "NY", "IL", "PA", "OH", "GA", "NC", "MI"],
-    #     "Registrations": [1500, 1300, 1100, 950, 870, 820, 780, 750, 720, 700]
-    # }
-
-    # # Convert to DataFrame
-    # df = pd.DataFrame(state_data)
-
-    # # Get Latitude & Longitude for Each State
-    # state_coords = {
-    #     "CA": [36.7783, -119.4179], "TX": [31.9686, -99.9018], "FL": [27.9944, -81.7603],
-    #     "NY": [40.7128, -74.0060], "IL": [40.6331, -89.3985], "PA": [41.2033, -77.1945],
-    #     "OH": [40.4173, -82.9071], "GA": [32.1656, -82.9001], "NC": [35.7596, -79.0193],
-    #     "MI": [44.3148, -85.6024]
-    # }
-
-    # # Add Latitude & Longitude to DataFrame
-    # df["Latitude"] = df["Abbreviation"].map(lambda x: state_coords[x][0])
-    # df["Longitude"] = df["Abbreviation"].map(lambda x: state_coords[x][1])
-
-    # # Create US Map with Plotly
-    # fig = px.scatter_geo(
-    #     df,
-    #     lat="Latitude",
-    #     lon="Longitude",
-    #     text="State",
-    #     size="Registrations",
-    #     size_max=30,  # Control max circle size
-    #     projection="albers usa",
-    #     title="Event Registrations by State",
-    #     color_discrete_sequence=["blue"]
-    # )
-
-    # # Display in Streamlit
-    # st.title("🗺️ Event Registrations Across the U.S.")
-    # st.plotly_chart(fig, use_container_width=True)
-
-    # st.write("📌 *Bubble sizes represent total event registrations per state.*")
