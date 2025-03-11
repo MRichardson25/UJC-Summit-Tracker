@@ -19,7 +19,7 @@ web_traffic = np.random.randint(500, 2000, size=len(days))
 
 # Event Statistics
 total_sales = sum(ticket_sales)
-total_budget = 8000
+total_budget = 7000
 progress = (total_sales / total_budget) * 100
 
 # Registrations Breakdown
