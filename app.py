@@ -437,41 +437,6 @@ with tab1:
         st.plotly_chart(fig, use_container_width=True)
 
 with tab2:
-    col_r_1, col_r_2 = st.columns([2, 1])
-    with col_r_1:
-        st.markdown("<h1 style='text-align: left;'>Top 5 Advisors by Registrations</h1>", unsafe_allow_html=True)
-
-        # Get top 5 ambassador sources
-        top_adv = filtered_advisor_counts.nlargest(5, "Count")  # ✅ Keep only top 5
-
-        # Create a Plotly bar chart
-        fig2 = px.bar(
-            top_adv,  # ✅ Use the correct DataFrame
-            x="Response",
-            y="Count",
-            orientation="v",
-            text="Count")
-
-        # Manually set all bars to blue
-        fig2.update_traces(marker=dict(color="blue"))
-        
-        fig2.update_traces(
-            hovertemplate="%{x}: %{y} registrations<extra></extra>")
-
-        # Format chart aesthetics
-        fig2.update_layout(
-            xaxis_title="Advisor",
-            yaxis_title="Attendees Registered",
-            template="plotly_white",
-            showlegend=False,  # ✅ Completely remove legend
-            margin=dict(l=50, r=50, t=50, b=50))
-
-        # Show chart in Streamlit
-        st.plotly_chart(fig2, use_container_width=True)
-
-    with col_r_2:
-        st.markdown("<br><br><br><br>", unsafe_allow_html=True)
-        st.dataframe(filtered_advisor_counts, height=400) 
 
     col_r_3, col_r_4 = st.columns([2, 1])
     with col_r_3:
@@ -511,6 +476,42 @@ with tab2:
         filtered_ambassador_counts = filtered_ambassador_counts.replace(r'^\s*$', None, regex=True)
         filtered_ambassador_counts = filtered_ambassador_counts.dropna(how='all')
         st.dataframe(filtered_ambassador_counts, height=400)
+
+    col_r_1, col_r_2 = st.columns([2, 1])
+    with col_r_1:
+        st.markdown("<h1 style='text-align: left;'>Top 5 Advisors by Registrations</h1>", unsafe_allow_html=True)
+
+            # Get top 5 ambassador sources
+        top_adv = filtered_advisor_counts.nlargest(5, "Count")  # ✅ Keep only top 5
+
+        # Create a Plotly bar chart
+        fig2 = px.bar(
+            top_adv,  # ✅ Use the correct DataFrame
+            x="Response",
+            y="Count",
+            orientation="v",
+            text="Count")
+
+        # Manually set all bars to blue
+        fig2.update_traces(marker=dict(color="blue"))
+        
+        fig2.update_traces(
+            hovertemplate="%{x}: %{y} registrations<extra></extra>")
+
+        # Format chart aesthetics
+        fig2.update_layout(
+            xaxis_title="Advisor",
+            yaxis_title="Attendees Registered",
+            template="plotly_white",
+            showlegend=False,  # ✅ Completely remove legend
+            margin=dict(l=50, r=50, t=50, b=50))
+
+        # Show chart in Streamlit
+        st.plotly_chart(fig2, use_container_width=True)
+
+    with col_r_2:
+        st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+        st.dataframe(filtered_advisor_counts, height=400) 
 
     col_r_5, col_r_6 = st.columns([2, 1])
     with col_r_5:
