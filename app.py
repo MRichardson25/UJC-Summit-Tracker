@@ -604,7 +604,7 @@ with tab3:
     #Function output reference to variables
     #duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
     df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    st.write("Example: 2022 & 2023 Repeat Attendees - Represents number of individuals who registered both 2022 and 2023 summits")
+    st.write("Example: 2022 & 2023 Repeat Attendees - Represents number of individuals who registered for both 2022 and 2023 summits.")
 
     def align_right_table(df):
         st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
