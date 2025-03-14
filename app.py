@@ -10,12 +10,11 @@ import matplotlib.pyplot as plt
 from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# test
+# Set page config
 st.set_page_config(page_title="UJC Summit Registration Tracker Dashboard", layout="wide")
-### Password
 
-# Set a simple password (Change this to your desired password)
 load_dotenv()
 PASSWORD = os.getenv("STREAMLIT_PASSWORD")
 
@@ -23,37 +22,55 @@ PASSWORD = os.getenv("STREAMLIT_PASSWORD")
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-# If not authenticated, ask for the password
+# Authentication logic
 if not st.session_state.authenticated:
     user_input = st.text_input("Enter Password:", type="password")
 
     if st.button("Submit"):
         if user_input == PASSWORD:
             st.session_state.authenticated = True
-            st.rerun()  # Refresh the app to show the content
+            st.rerun()  # Refresh the app
         else:
             st.error("Incorrect password. Try again.")
 
-# If authenticated, show the app content
+# Show the dashboard if authenticated
 if st.session_state.authenticated:
     st.success("Access Granted!")
     st.write("Welcome to the UJC Summit 2025 Dashboard!")
-    # Your app content goes here
 
-
-
-
-    ### Password
-    tabs = ["Event Tracker","Registration Leaderboard", "Paid Promotion Performance"]
+    # Sidebar navigation to track active tab
+    tabs = ["Event Tracker", "Registration Leaderboard", "Paid Promotion Performance"]
     tab1, tab2, tab3 = st.tabs(tabs)
+
+    # Sidebar instructions dictionary
+    instructions = {
+        "Event Tracker": "Track event registrations by date, location, and repeat attendees across previous summits.",
+        "Registration Leaderboard": "View the top contributors and sources driving the most registrations.",
+        "Paid Promotion Performance": "Analyze the impact of paid advertisements."
+    }
+    st.sidebar.header("UJC Summit 2025 Tracker")
+    st.sidebar.markdown("### Updated 12pm daily.")
+
+    st.sidebar.markdown("### Overview:")
+    for tab, instruction in instructions.items():
+        st.sidebar.markdown(f"**<u>{tab}</u>:** {instruction}", unsafe_allow_html=True)
+    
+    st.sidebar.markdown("#### Collapse sidebar for a full-screen view.")
+    #st.sidebar.markdown(
+    #"<h4 style='color:#FF5733;'>Collapse sidebar for a full-screen view.</h4>", 
+    #unsafe_allow_html=True)
+
+    # for tab, instruction in instructions.items():
+    #     st.sidebar.markdown(f"**{tab}:** {instruction}")
 
     # Custom responses to survey questions + open ended
     survey_data = ("Data/report-2025-03-11T1646.csv")
     # Just the summary (orders, attendees, Name aka location)
     order_data = ("Data/Eventbrite Attendees Table - 2025-3-11 (1).csv")
-    old_attendees = ("Data/Perm/Summit Data Stuff - Past Summit Names.csv")
-    combined_old_attendees = ("Data/Perm/Summit Data Stuff - Sheet6.csv")
-    all_years_attendees = ("Data/Perm/Summit Data Stuff - AllDD.csv")
+
+    # old_attendees = ("Data/Perm/Summit Data Stuff - Past Summit Names.csv")
+    # combined_old_attendees = ("Data/Perm/Summit Data Stuff - Sheet6.csv")
+    # all_years_attendees = ("Data/Perm/Summit Data Stuff - AllDD.csv")
     data_2022 = ("Data/Perm/Summit Data Stuff - 2022 Raw.csv")
     data_2023 = ("Data/Perm/Summit Data Stuff - 2023Raw.csv")
 
@@ -214,10 +231,8 @@ if st.session_state.authenticated:
 
         return duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
 
-
     with tab1:
             
-
         st.image("Data/Perm/UJC_Summit_Logo_2023_horizontal-logo-wordmark-3-white.png")
         # Just the summary (orders, attendees, Name aka location)
         ticket_data = pd.read_csv(order_data)
@@ -352,10 +367,7 @@ if st.session_state.authenticated:
         st.markdown(custom_css, unsafe_allow_html=True)
 
         # Create columns for metrics
-        col1, col2, col3, col4, col5 = st.columns(5)
-
-        with col1:
-            st.markdown(f'<div class="metric-box"><div class="title">Returning Summit Attendees</div><div class="number" style="color: #20D6D3;">{prev_attendee_response:,}</div></div>', unsafe_allow_html=True)
+        col2, col3, col4, col5 = st.columns(4)
 
         with col2:
             st.markdown(f'<div class="metric-box"><div class="title">Students Registered</div><div class="number pink">{students_registered:,}</div></div>', unsafe_allow_html=True)
@@ -370,7 +382,26 @@ if st.session_state.authenticated:
             st.markdown(f'<div class="metric-box"><div class="title">Eventbrite Page Views</div><div class="number" style="color: #20D6D3;">{eventbrite_views:,}</div></div>', unsafe_allow_html=True)
             
 
-        st.sidebar.header("UJC Summit Tracker")
+        #Function output reference to variables
+        #duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
+        st.divider()
+
+        df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
+
+        col_6, col_7, col_8, col_9 = st.columns(4)
+
+        with col_6:
+            st.markdown(f'<div class="metric-box"><div class="title">2022 & 2023 Repeat Attendees</div><div class="number pink">{len(df1_res):,}</div></div>', unsafe_allow_html=True)
+
+        with col_7:
+            st.markdown(f'<div class="metric-box"><div class="title"/?>2022 & 2025 Repeat Attendees</div><div class="number" style="color: #FEC110;">{len(df4_res):,}</div></div>', unsafe_allow_html=True)
+
+        with col_8:
+            st.markdown(f'<div class="metric-box"><div class="title">2023 & 2025 Repeat Attendees</div><div class="number orange">{len(df2_res):,}</div></div>', unsafe_allow_html=True)
+
+        with col_9:
+            st.markdown(f'<div class="metric-box"><div class="title">All 3 Summit Repeat Attendees</div><div class="number" style="color: #20D6D3;">{len(df3_res):,}</div></div>', unsafe_allow_html=True)
+
 
         # Load attendee data
         df_state = pd.read_csv(order_data)
@@ -506,112 +537,127 @@ if st.session_state.authenticated:
             # Show chart in Streamlit
             st.plotly_chart(fig, use_container_width=True)
 
-            df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-
-            st.write(f"2022 and 2023 # Repeat attendees: {len(df1_res)}")
-            st.write(f"2023 and 2025 # Repeat attendees: {len(df2_res)}")
-            st.write(f"All Summit # Repeat attendees: {len(df3_res)}")
-            st.write(f"2022 and 2025 # Repeat attendees: {len(df4_res)}")
-
+            
     with tab2:
+        col_r_1, col_r_2 = st.columns([2, 1])
+        with col_r_1:
+            st.markdown("<h1 style='text-align: left;'>Top 5 Advisors by Registrations</h1>", unsafe_allow_html=True)
+
+            # Get top 5 ambassador sources
+            top_adv = filtered_advisor_counts.nlargest(5, "Count")  # ✅ Keep only top 5
+
+            # Create a Plotly bar chart
+            fig2 = px.bar(
+                top_adv,  # ✅ Use the correct DataFrame
+                x="Response",
+                y="Count",
+                orientation="v",
+                text="Count")
+
+            # Manually set all bars to blue
+            fig2.update_traces(marker=dict(color="blue"))
             
-        # Hide "No" and NaN responses before displaying
-        st.markdown("<h1 style='text-align: left;'>Top 5 Advisors by Registrations</h1>", unsafe_allow_html=True)
+            fig2.update_traces(
+                hovertemplate="%{x}: %{y} registrations<extra></extra>")
 
-        # Get top 5 ambassador sources
-        top_adv = filtered_advisor_counts.nlargest(5, "Count")  # ✅ Keep only top 5
+            # Format chart aesthetics
+            fig2.update_layout(
+                xaxis_title="Advisor",
+                yaxis_title="Attendees Registered",
+                template="plotly_white",
+                showlegend=False,  # ✅ Completely remove legend
+                margin=dict(l=50, r=50, t=50, b=50))
 
-        # Create a Plotly bar chart
-        fig2 = px.bar(
-            top_adv,  # ✅ Use the correct DataFrame
-            x="Response",
-            y="Count",
-            orientation="v",
-            text="Count")
+            # Show chart in Streamlit
+            st.plotly_chart(fig2, use_container_width=True)
 
-        # Manually set all bars to blue
-        fig2.update_traces(marker=dict(color="blue"))
-        
-        fig2.update_traces(
-            hovertemplate="%{x}: %{y} registrations<extra></extra>")
+        with col_r_2:
+            st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+            st.dataframe(filtered_advisor_counts, height=400) 
 
-        # Format chart aesthetics
-        fig2.update_layout(
-            xaxis_title="Advisor",
-            yaxis_title="Attendees Registered",
-            template="plotly_white",
-            showlegend=False,  # ✅ Completely remove legend
-            margin=dict(l=50, r=50, t=50, b=50))
+        col_r_3, col_r_4 = st.columns([2, 1])
+        with col_r_3:
 
-        # Show chart in Streamlit
-        st.plotly_chart(fig2, use_container_width=True)
-        st.markdown("<h1 style='text-align: left;'>Top 5 Ambassadors by Registrations</h1>", unsafe_allow_html=True)
-        ## Get top 5 ambassador sources
-        top_amb = filtered_ambassador_counts.nlargest(5, "Count")  # ✅ Keep only top 5
+            st.markdown("<h1 style='text-align: left;'>Top 5 Ambassadors by Registrations</h1>", unsafe_allow_html=True)
+            ## Get top 5 ambassador sources
+            top_amb = filtered_ambassador_counts.nlargest(5, "Count")  # ✅ Keep only top 5
 
-        # Create a Plotly bar chart
-        fig3 = px.bar(
-            top_amb,  # ✅ Use the correct DataFrame
-            x="Response",
-            y="Count",
-            orientation="v",
-            text="Count")
+            # Create a Plotly bar chart
+            fig3 = px.bar(
+                top_amb,  # ✅ Use the correct DataFrame
+                x="Response",
+                y="Count",
+                orientation="v",
+                text="Count")
 
-        # Manually set all bars to blue
-        fig3.update_traces(marker=dict(color="blue"))
+            # Manually set all bars to blue
+            fig3.update_traces(marker=dict(color="blue"))
 
-        fig3.update_traces(
-            hovertemplate="%{x}: %{y} registrations<extra></extra>"
+            fig3.update_traces(
+                hovertemplate="%{x}: %{y} registrations<extra></extra>"
+                
+            )
+
+            # Format chart aesthetics
+            fig3.update_layout(
+                xaxis_title="Ambassador",
+                yaxis_title="Attendees Registered",
+                template="plotly_white",
+                showlegend=False,  # ✅ Completely remove legend
+                margin=dict(l=50, r=50, t=50, b=50),
+            )
+
+            # Show chart in Streamlit
+            st.plotly_chart(fig3, use_container_width=True)
+        with col_r_4:
+            st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+            filtered_ambassador_counts = filtered_ambassador_counts.replace(r'^\s*$', None, regex=True)
+            filtered_ambassador_counts = filtered_ambassador_counts.dropna(how='all')
+            st.dataframe(filtered_ambassador_counts, height=400)
+
+        col_r_5, col_r_6 = st.columns([2, 1])
+        with col_r_5:
+            st.markdown("<h1 style='text-align: left;'>Top 5 Sources for Registrations</h1>", unsafe_allow_html=True)
+
+            ## Get top 5 ambassador sources
+            top_hearing = filtered_hearing_source_counts.nlargest(5, "Count")  # ✅ Keep only top 5
+
+            # Create a Plotly bar chart
+            fig4 = px.bar(
+                top_hearing,  # ✅ Use the correct DataFrame
+                x="Response",
+                y="Count",
+                orientation="v",
+                text="Count",
+            )
+
+            # Manually set all bars to blue
+            fig4.update_traces(marker=dict(color="blue"),textangle=0)
+            fig4.update_traces(
+                hovertemplate="%{x}: %{y} registrations<extra></extra>"
+                
+            )
             
-        )
+            # Format chart aesthetics
+            fig4.update_layout(
+                xaxis_title="Source",
+                yaxis_title="Attendees Registered",
+                template="plotly_white",
+                showlegend=False,  # ✅ Completely remove legend
+                margin=dict(l=50, r=50, t=50, b=50),
+            )
 
-        # Format chart aesthetics
-        fig3.update_layout(
-            xaxis_title="Ambassador",
-            yaxis_title="Attendees Registered",
-            template="plotly_white",
-            showlegend=False,  # ✅ Completely remove legend
-            margin=dict(l=50, r=50, t=50, b=50),
-        )
+            # Show chart in Streamlit
+            st.plotly_chart(fig4, use_container_width=True)
+            # Get top 5 ambassador sources
 
-        # Show chart in Streamlit
-        st.plotly_chart(fig3, use_container_width=True)
-
-        st.markdown("<h1 style='text-align: left;'>Top 5 Sources for Registrations</h1>", unsafe_allow_html=True)
-
-        ## Get top 5 ambassador sources
-        top_hearing = filtered_hearing_source_counts.nlargest(5, "Count")  # ✅ Keep only top 5
-
-        # Create a Plotly bar chart
-        fig4 = px.bar(
-            top_hearing,  # ✅ Use the correct DataFrame
-            x="Response",
-            y="Count",
-            orientation="v",
-            text="Count",
-        )
-
-        # Manually set all bars to blue
-        fig4.update_traces(marker=dict(color="blue"),textangle=0)
-        fig4.update_traces(
-            hovertemplate="%{x}: %{y} registrations<extra></extra>"
-            
-        )
-        
-        # Format chart aesthetics
-        fig4.update_layout(
-            xaxis_title="Source",
-            yaxis_title="Attendees Registered",
-            template="plotly_white",
-            showlegend=False,  # ✅ Completely remove legend
-            margin=dict(l=50, r=50, t=50, b=50),
-        )
-
-        # Show chart in Streamlit
-        st.plotly_chart(fig4, use_container_width=True)
-        # Get top 5 ambassador sources
-
+        with col_r_6:
+            st.markdown("<br><br><br><br>", unsafe_allow_html=True)
+            filtered_hearing_source_counts = filtered_hearing_source_counts.dropna(how='all')
+            st.dataframe(filtered_hearing_source_counts, height=400) 
         col7, col8 = st.columns(2)
+
+
         with col7:
             # Create AgGrid options
             gb = GridOptionsBuilder.from_dataframe(filtered_ambassador_counts)
