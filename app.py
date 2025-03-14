@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 from dotenv import load_dotenv
-from dotenv import load_dotenv
 
 # Set page config
 st.set_page_config(page_title="UJC Summit Registration Tracker Dashboard", layout="wide")
@@ -22,7 +21,7 @@ PASSWORD = os.getenv("STREAMLIT_PASSWORD")
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
-# Authentication logic
+# Authentication
 if not st.session_state.authenticated:
     user_input = st.text_input("Enter Password:", type="password")
 
@@ -33,16 +32,15 @@ if not st.session_state.authenticated:
         else:
             st.error("Incorrect password. Try again.")
 
-# Show the dashboard if authenticated
+# Shows the dashboard if authenticated
 if st.session_state.authenticated:
     st.success("Access Granted!")
     st.write("Welcome to the UJC Summit 2025 Dashboard!")
 
-    # Sidebar navigation to track active tab
     tabs = ["Event Tracker", "Registration Leaderboard", "Paid Promotion Performance"]
     tab1, tab2, tab3 = st.tabs(tabs)
 
-    # Sidebar instructions dictionary
+    # Sidebar instructions
     instructions = {
         "Event Tracker": "Track event registrations by date, location, and repeat attendees across previous summits.",
         "Registration Leaderboard": "View the top contributors and sources driving the most registrations.",
@@ -56,31 +54,23 @@ if st.session_state.authenticated:
         st.sidebar.markdown(f"**<u>{tab}</u>:** {instruction}", unsafe_allow_html=True)
     
     st.sidebar.markdown("#### Collapse sidebar for a full-screen view.")
-    #st.sidebar.markdown(
-    #"<h4 style='color:#FF5733;'>Collapse sidebar for a full-screen view.</h4>", 
-    #unsafe_allow_html=True)
 
-    # for tab, instruction in instructions.items():
-    #     st.sidebar.markdown(f"**{tab}:** {instruction}")
+    #Data File References - Manually change this everyday by ~~
 
     # Custom responses to survey questions + open ended
     survey_data = ("Data/report-2025-03-11T1646.csv")
     # Just the summary (orders, attendees, Name aka location)
     order_data = ("Data/Eventbrite Attendees Table - 2025-3-11 (1).csv")
 
-    # old_attendees = ("Data/Perm/Summit Data Stuff - Past Summit Names.csv")
-    # combined_old_attendees = ("Data/Perm/Summit Data Stuff - Sheet6.csv")
-    # all_years_attendees = ("Data/Perm/Summit Data Stuff - AllDD.csv")
+    # DO NOT CHANGE THESE REFERENCES
     data_2022 = ("Data/Perm/Summit Data Stuff - 2022 Raw.csv")
     data_2023 = ("Data/Perm/Summit Data Stuff - 2023Raw.csv")
 
     df_survey = pd.read_csv(survey_data)
 
     def analyze_survey_data(csv_file):
-            # Load CSV file
             df = pd.read_csv(csv_file)
-            
-            # Define column names based on the given survey questions
+            # Survey questions
             student_col = "Are you a student?"
             ambassador_col = "Did a UJC Ambassador Invite you to the Summit?"
             hearing_source_col = "How did you hear about that hear about the Summit?"
@@ -93,11 +83,8 @@ if st.session_state.authenticated:
             if missing_columns:
                 st.error(f"Missing expected columns: {missing_columns}")
                 return
-
-            # Fill NaN values with "Unknown" for better readability
-            # df.fillna("Unknown", inplace=True)
+            
             df = df.astype(str).fillna("Unknown")
-
 
             # Count student responses (Yes/No)
             student_counts = df[student_col].value_counts().reset_index()
@@ -123,107 +110,47 @@ if st.session_state.authenticated:
     filtered_ambassador_counts = ambassador_counts[(ambassador_counts["Response"] != "No") & (ambassador_counts["Response"] != "nan")]
     filtered_hearing_source_counts = hearing_source_counts[(hearing_source_counts["Response"] != "No") & (hearing_source_counts["Response"] != "nan") & (hearing_source_counts["Response"] != "Other (Please describe in next question)")]
 
-    # def process_files(file1, file2, file3):
-    #     # Load the CSV files
-    #     df1 = pd.read_csv(file1)
-    #     df2 = pd.read_csv(file2)
-    #     df3 = pd.read_csv(file3)
-
-    #     # Remove duplicate observations based on the 'Name' column for file 1 and 2
-    #     df1_dedup = df1.drop_duplicates(subset=['Name'])
-    #     df2_dedup = df2.drop_duplicates(subset=['Name'])
-
-    #     # Create a new dataframe from file 3 with concatenated 'First Name' and 'Last Name'
-    #     df3_new = pd.DataFrame()
-    #     df3_new['Name'] = df3['First Name'] + " " + df3['Last Name']
-    
-    #     # Remove duplicate observations from the new dataframe
-    #     df3_dedup = df3_new.drop_duplicates()
-
-    #     return df1_dedup, df2_dedup, df3_dedup
-
-    # def calc_returners(df1_dedup,df2_dedup,df3_dedup):
-    #     df1_dedup['Name'] = df1_dedup['Name'].str.strip()
-    #     df2_dedup['Name'] = df2_dedup['Name'].str.strip()
-    #     df3_dedup['Name'] = df3_dedup['Name'].str.strip()
-
-    #     # Combine df1_result and df2_result into one column "Name"
-    #     t22to23 = pd.concat([df1_dedup, df2_dedup], ignore_index=True)
-    #     # Count occurrences of each unique name
-    #     name_counts = t22to23['Name'].value_counts()
-
-    #     # Filter names that appear more than once
-    #     duplicates_only = name_counts[name_counts > 1].reset_index()
-    #     duplicates_only.columns = ['Name', 'Count']
-
-    #     # 2023 and 2025
-    #     t23to25 = pd.concat([df2_dedup, df3_dedup], ignore_index=True)
-    #     #t23to25['Name'] = t23to25['Name'].str.strip().str.lower()
-    #     #print("Count in t23to25:", t23to25['Name'].value_counts().get('adrienneamoah', 0))
-
-    #     # Count occurrences of each unique name
-    #     name_counts2 = t23to25['Name'].value_counts()
-
-
-    #     # Filter names that appear more than once
-    #     duplicates_only2 = name_counts2[name_counts2 > 1].reset_index()
-    #     duplicates_only2.columns = ['Name', 'Count']
-
-    #     # 2022, 2023 and 2025
-    #     t22to25 = pd.concat([df1_dedup,df2_dedup, df3_dedup], ignore_index=True)
-    #     # Count occurrences of each unique name
-    #     name_counts3 = t22to25['Name'].value_counts()
-
-    #     # Filter names that appear more than once
-    #     duplicates_only3 = name_counts3[name_counts3 > 2].reset_index()
-    #     duplicates_only3.columns = ['Name', 'Count']
-
-    #     return duplicates_only, duplicates_only2, duplicates_only3
-
-    # 2022 and 2025 one
     def process_and_calc_returners(file1, file2, file3):
         # Load the CSV files
         df1 = pd.read_csv(file1)
         df2 = pd.read_csv(file2)
         df3 = pd.read_csv(file3)
 
-        # Select only relevant columns
-        df1 = df1[['Name']]  # Keep only 'Name' column
-        df2 = df2[['Name']]  # Keep only 'Name' column
-        df3 = df3[['First Name', 'Last Name']]  # Keep only necessary columns
+        df1 = df1[['Name']]  
+        df2 = df2[['Name']] 
+        df3 = df3[['First Name', 'Last Name']]
 
-        # Combine first and last name in df3
         df3["Name"] = (df3["First Name"].astype(str).str.strip() + " " + df3["Last Name"].astype(str).str.strip()).str.lower()
 
-        # Drop unnecessary columns
         df3 = df3[["Name"]]
 
-        # Standardize name formatting (strip spaces & lowercase)
         for df in [df1, df2, df3]:
             df["Name"] = df["Name"].astype(str).str.replace(r'\s+', ' ', regex=True).str.strip().str.lower()
 
-        # Remove duplicates in all datasets
         df1 = df1.drop_duplicates(subset=["Name"])
         df2 = df2.drop_duplicates(subset=["Name"])
         df3 = df3.drop_duplicates(subset=["Name"])
 
-        # Finding Returning Users
+        # Finding Returning Users 
+
+            # 2022 and 2023
         t22to23 = pd.concat([df1, df2], ignore_index=True)
         name_counts_22_23 = t22to23["Name"].value_counts()
         duplicates_22_23 = name_counts_22_23[name_counts_22_23 > 1].reset_index()
         duplicates_22_23.columns = ["Name", "Count"]
-
+            # 2023 and 2025
         t23to25 = pd.concat([df2, df3], ignore_index=True)
         name_counts_23_25 = t23to25["Name"].value_counts()
         duplicates_23_25 = name_counts_23_25[name_counts_23_25 > 1].reset_index()
         duplicates_23_25.columns = ["Name", "Count"]
 
+            # All 3 summits
         t22to25 = pd.concat([df1, df2, df3], ignore_index=True)
         name_counts_22_23_25 = t22to25["Name"].value_counts()
         duplicates_22_23_25 = name_counts_22_23_25[name_counts_22_23_25 > 2].reset_index()
         duplicates_22_23_25.columns = ["Name", "Count"]
 
-        # Finding returning users between 2022 and 2025
+            # Finding returning users between 2022 and 2025
         t22and25 = pd.concat([df1, df3], ignore_index=True)
         name_counts_22_25 = t22and25["Name"].value_counts()
         duplicates_22_25 = name_counts_22_25[name_counts_22_25 > 1].reset_index()
@@ -232,7 +159,6 @@ if st.session_state.authenticated:
         return duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
 
     with tab1:
-            
         st.image("Data/Perm/UJC_Summit_Logo_2023_horizontal-logo-wordmark-3-white.png")
         # Just the summary (orders, attendees, Name aka location)
         ticket_data = pd.read_csv(order_data)
@@ -244,14 +170,11 @@ if st.session_state.authenticated:
         progress = (total_sales / total_budget) * 100
 
         event_date = datetime(2025, 5, 30)  # Change to your event date
-
         # Get today's date
         today = datetime.today()
-
         # Calculate days remaining
         days_until_event = (event_date - today).days
 
-        # Display the countdown
         st.markdown(f"""
         ### <span style='color: orange; font-weight: bold;'>{days_until_event}</span> days until UJC Summit 2025! 🎉
         """, unsafe_allow_html=True)
@@ -259,7 +182,6 @@ if st.session_state.authenticated:
 
         st.title("🎟️ Event Tracker Dashboard")
 
-        # Top Metrics (Like Total Balance and Monthly Budget)
         col1, col2 = st.columns([0.8, 0.2])
         with col1:
             st.metric("Total Ticket Sales", f"{total_sales:,.0f}")
@@ -292,16 +214,13 @@ if st.session_state.authenticated:
             mode="lines+markers"
         )
 
-
         fig.update_layout(
             xaxis_tickangle=-45,
             hovermode="x unified"
         )
-
-        # Display the chart in Streamlit
         st.plotly_chart(fig, use_container_width=True)
 
-        # Define survey inclusion criteria
+        # Define survey exclusion criteria
         invalid_entries = ["unknown", "no", "none", "n/a", "na", "NA", "nan"]
 
         num_rows = df_survey.shape[0]
@@ -381,11 +300,10 @@ if st.session_state.authenticated:
         with col5:
             st.markdown(f'<div class="metric-box"><div class="title">Eventbrite Page Views</div><div class="number" style="color: #20D6D3;">{eventbrite_views:,}</div></div>', unsafe_allow_html=True)
             
+        st.divider()
 
         #Function output reference to variables
         #duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
-        st.divider()
-
         df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
 
         col_6, col_7, col_8, col_9 = st.columns(4)
@@ -437,9 +355,8 @@ if st.session_state.authenticated:
             "GB-LBH": (51.4746, -0.3620), "GB-MAN": (53.483959, -2.244644), "VI-T": (18.3358, -64.8963)
         }
 
-        # Merge both datasets
+        # if i want to Merge both datasets
         #all_latlon = {**state_latlon, **non_us_latlon}
-
 
         # Convert dictionary to DataFrame
         latlon_df = pd.DataFrame(state_latlon.items(), columns=["StateCode", "Coordinates"])
@@ -478,7 +395,7 @@ if st.session_state.authenticated:
         with col1:
             st.title("Event Registrations by State")
 
-            # Create a Folium world map
+            # Create a Folium *world map
             # world_map = folium.Map(location=[20, 0], zoom_start=2) For Global view
 
             # Filter to only show US states
@@ -537,7 +454,6 @@ if st.session_state.authenticated:
             # Show chart in Streamlit
             st.plotly_chart(fig, use_container_width=True)
 
-            
     with tab2:
         col_r_1, col_r_2 = st.columns([2, 1])
         with col_r_1:
@@ -594,8 +510,7 @@ if st.session_state.authenticated:
             fig3.update_traces(marker=dict(color="blue"))
 
             fig3.update_traces(
-                hovertemplate="%{x}: %{y} registrations<extra></extra>"
-                
+                hovertemplate="%{x}: %{y} registrations<extra></extra>"     
             )
 
             # Format chart aesthetics
@@ -702,9 +617,7 @@ if st.session_state.authenticated:
                 theme="balham",  # ✅ Set grid theme
                 )
         
-
     with tab3:
-
         # Custom Static Data (Manually Updated)
         ad_list = [
         ["UJC Website", "$0.00", "3,009", "326", "10.4%", "$0.00"],
@@ -780,4 +693,3 @@ if st.session_state.authenticated:
 
         # Display the chart in Streamlit
         st.plotly_chart(fig5, use_container_width=True)
-            
