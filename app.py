@@ -37,14 +37,15 @@ load_dotenv()
 #     st.success("Access Granted!")
 st.write("Welcome to the UJC Summit 2025 Dashboard!")
 
-tabs = ["Event Tracker", "Registration Leaderboard", "Paid Promotion Performance"]
+tabs = ["Event Tracker", "Registration Leaderboard", "Repeat Attendees"] #Paid Promotion Performance
 tab1, tab2, tab3 = st.tabs(tabs)
 
 # Sidebar instructions
 instructions = {
     "Event Tracker": "Track event registrations by date, location, and repeat attendees across previous summits.",
     "Registration Leaderboard": "View the top contributors and sources driving the most registrations.",
-    "Paid Promotion Performance": "Analyze the impact of paid advertisements."
+    "Repeat Attendees": "View the count and names of individuals who registered for previous summits."
+    #"Paid Promotion Performance": "Analyze the impact of paid advertisements."
 }
 st.sidebar.header("UJC Summit 2025 Tracker")
 st.sidebar.markdown("### Updated 12pm daily.")
@@ -301,25 +302,6 @@ with tab1:
         st.markdown(f'<div class="metric-box"><div class="title">Eventbrite Page Views</div><div class="number" style="color: #20D6D3;">{eventbrite_views:,}</div></div>', unsafe_allow_html=True)
         
     st.divider()
-
-    #Function output reference to variables
-    #duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
-    df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-
-    col_6, col_7, col_8, col_9 = st.columns(4)
-
-    with col_6:
-        st.markdown(f'<div class="metric-box"><div class="title">2022 & 2023 Repeat Attendees</div><div class="number pink">{len(df1_res):,}</div></div>', unsafe_allow_html=True)
-
-    with col_7:
-        st.markdown(f'<div class="metric-box"><div class="title"/?>2022 & 2025 Repeat Attendees</div><div class="number" style="color: #FEC110;">{len(df4_res):,}</div></div>', unsafe_allow_html=True)
-
-    with col_8:
-        st.markdown(f'<div class="metric-box"><div class="title">2023 & 2025 Repeat Attendees</div><div class="number orange">{len(df2_res):,}</div></div>', unsafe_allow_html=True)
-
-    with col_9:
-        st.markdown(f'<div class="metric-box"><div class="title">All 3 Summit Repeat Attendees</div><div class="number" style="color: #20D6D3;">{len(df3_res):,}</div></div>', unsafe_allow_html=True)
-
 
     # Load attendee data
     df_state = pd.read_csv(order_data)
@@ -618,78 +600,130 @@ with tab2:
     #         )
     
 with tab3:
+    #Function output reference to variables
+    #duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
+    df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
+    st.write("Example: 2022 & 2023 Repeat Attendees - Represents number of individuals who registered both 2022 and 2023 summits")
+
+    def align_right_table(df):
+        st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
+        st.dataframe(df, height=150)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    col_6, col_7, col_8, col_9 = st.columns(4)
+
+    with col_6:
+        st.markdown(f'<div class="metric-box"><div class="title">2022 & 2023 Repeat Attendees</div><div class="number pink">{len(df1_res):,}</div></div>', unsafe_allow_html=True)
+        df1_res = df1_res.sort_values(by="Name") 
+        st.table(df1_res["Name"])
+        #align_right_table(df1_res)  # Shift table position
+
+
+    with col_7:
+        st.markdown(f'<div class="metric-box"><div class="title"/?>2022 & 2025 Repeat Attendees</div><div class="number" style="color: #FEC110;">{len(df4_res):,}</div></div>', unsafe_allow_html=True)
+        #st.text("*Number of individuals who registered in 2022 and 2025(still in progress)")
+        df4_res = df4_res.sort_values(by="Name") 
+        st.table(df4_res["Name"]) 
+        #align_right_table(df4_res)  # Shift table position
+
+    with col_8:
+        st.markdown(f'<div class="metric-box"><div class="title">2023 & 2025 Repeat Attendees</div><div class="number orange">{len(df2_res):,}</div></div>', unsafe_allow_html=True)
+        #st.write("*Number of individuals who registered in 2023 and 2025(still in progress)")
+
+        df2_res = df2_res.sort_values(by="Name") 
+        st.table(df2_res["Name"]) 
+        #align_right_table(df2_res)  # Shift table position
+
+    with col_9:
+        st.markdown(f'<div class="metric-box"><div class="title">All 3 Summit Repeat Attendees</div><div class="number" style="color: #20D6D3;">{len(df3_res):,}</div></div>', unsafe_allow_html=True)
+        #st.write("*Number of individuals who registered for all 3 summits(still in progress)")
+
+        df3_res = df3_res.sort_values(by="Name") 
+        st.table(df3_res["Name"]) 
+        #align_right_table(df3_res["Name"])  # Shift table position
+
+
+    # col_10, col_11, col_12, col_13 = st.columns(4)
+    # with col_10:
+    #         st.dataframe(df1_res["Name"], height=400) 
+    # with col_11:
+    #     st.dataframe(df4_res["Name"], height=400) 
+    # with col_12:
+    #     st.dataframe(df2_res["Name"], height=400) 
+    # with col_13:
+    #     st.dataframe(df3_res["Name"], height=400) 
     # Custom Static Data (Manually Updated)
-    ad_list = [
-    ["UJC Website", "$0.00", "3,009", "326", "10.4%", "$0.00"],
-    ["Google (Performance Max)", "$842.65", "85,289", "8,500", "17", "$49.57"],
-    ["Google (Search Standard)", "$460.22", "313", "14", "2", "$230.11"],
-    ["Facebook", "$12,080.02", "509,997", "5,635", "815", "$14.82"],
-    ["Instagram", "$8,730.96", "364,022", "2,468", "723", "$12.08"],
-    ["LinkedIn", "$282.72", "10,261", "73", "0", "$0.00"],
-    ["TikTok", "$79.79", "11,795", "38", "0", "$0.00"],
-    ["Total", "$22,473.13", "982,089", "16,734", "1,557", "$14.27"]]
+#     ad_list = [
+#     ["UJC Website", "$0.00", "3,009", "326", "10.4%", "$0.00"],
+#     ["Google (Performance Max)", "$842.65", "85,289", "8,500", "17", "$49.57"],
+#     ["Google (Search Standard)", "$460.22", "313", "14", "2", "$230.11"],
+#     ["Facebook", "$12,080.02", "509,997", "5,635", "815", "$14.82"],
+#     ["Instagram", "$8,730.96", "364,022", "2,468", "723", "$12.08"],
+#     ["LinkedIn", "$282.72", "10,261", "73", "0", "$0.00"],
+#     ["TikTok", "$79.79", "11,795", "38", "0", "$0.00"],
+#     ["Total", "$22,473.13", "982,089", "16,734", "1,557", "$14.27"]]
     
-    columns = ["Platform", "Spend", "Impressions", "Link Clicks", "Conversion Rate(%)", "Cost Per Action (CPA)"]
-    df_ad = pd.DataFrame(ad_list, columns= columns)
+#     columns = ["Platform", "Spend", "Impressions", "Link Clicks", "Conversion Rate(%)", "Cost Per Action (CPA)"]
+#     df_ad = pd.DataFrame(ad_list, columns= columns)
 
-    # Title and Header Styling
-    st.markdown("<h1 style='text-align: center; color: white;'>Total Registrations from Ads</h1>", unsafe_allow_html=True)
+#     # Title and Header Styling
+#     st.markdown("<h1 style='text-align: center; color: white;'>Total Registrations from Ads</h1>", unsafe_allow_html=True)
 
-    col_1, col_2 = st.columns(2)
+#     col_1, col_2 = st.columns(2)
 
-    with col_1:
-        st.markdown("<h2 style='color: orange; font-size: 60px; text-align: center;'>1,557</h2>", unsafe_allow_html=True)
-        st.markdown("<h4 style='text-align: center; color: white;'>Total Registrations</h4>", unsafe_allow_html=True)
+#     with col_1:
+#         st.markdown("<h2 style='color: orange; font-size: 60px; text-align: center;'>1,557</h2>", unsafe_allow_html=True)
+#         st.markdown("<h4 style='text-align: center; color: white;'>Total Registrations</h4>", unsafe_allow_html=True)
 
-    with col_2:
-        st.markdown("<h2 style='color: pink; font-size: 60px; text-align: center;'>$14.27</h2>", unsafe_allow_html=True)
-        st.markdown("<h4 style='text-align: center; color: white;'>Average Cost-Per-Action (Registration)</h4>", unsafe_allow_html=True)
+#     with col_2:
+#         st.markdown("<h2 style='color: pink; font-size: 60px; text-align: center;'>$14.27</h2>", unsafe_allow_html=True)
+#         st.markdown("<h4 style='text-align: center; color: white;'>Average Cost-Per-Action (Registration)</h4>", unsafe_allow_html=True)
 
-    # Table Display
-    st.markdown("<h3 style='color: white;'>Advertising Performance Overview</h3>", unsafe_allow_html=True)
-    st.dataframe(df_ad.style.set_properties(**{'background-color': 'black', 'color': 'white', 'border-color': 'white'}))
+#     # Table Display
+#     st.markdown("<h3 style='color: white;'>Advertising Performance Overview</h3>", unsafe_allow_html=True)
+#     st.dataframe(df_ad.style.set_properties(**{'background-color': 'black', 'color': 'white', 'border-color': 'white'}))
 
-    # CPA Comparison
-    st.markdown("<h4 style='color: lightgreen; text-align: center;'>$10.73 LESS than 2022’s average CPA of $25.</h4>", unsafe_allow_html=True)
-
-
-    # MANUALLY UPDATE FROM HERE
-    linkfire_data = {
-    "Date": [
-        "2025-03-12T00:00:00.000Z", "2025-03-11T00:00:00.000Z", "2025-03-10T00:00:00.000Z",
-        "2025-03-09T00:00:00.000Z", "2025-03-08T00:00:00.000Z", "2025-03-07T00:00:00.000Z",
-        "2025-03-06T00:00:00.000Z", "2025-03-05T00:00:00.000Z", "2025-03-04T00:00:00.000Z",
-        "2025-03-03T00:00:00.000Z", "2025-03-02T00:00:00.000Z", "2025-03-01T00:00:00.000Z",
-        "2025-02-28T00:00:00.000Z", "2025-02-27T00:00:00.000Z", "2025-02-26T00:00:00.000Z",
-        "2025-02-25T00:00:00.000Z"
-    ],
-    "Visits": [11, 5, 17, 11, 24, 61, 8, 19, 80, 52, 13, 13, 68, 48, 124, 263]
-}
-    df_lf = pd.DataFrame(linkfire_data)
-
-    # Ensure "Order Date" is in datetime format
-    df_lf["Date"] = pd.to_datetime(df_lf["Date"], utc=True)
-    df_lf["Date"] = df_lf["Date"].dt.tz_localize(None)  # Remove timezone info
-
-    # Extract only the date part (drop time)
-    df_lf["Date"] = df_lf["Date"].dt.date
-
-    fig5 = px.line(df_lf, x="Date", y="Visits", markers=True, 
-                title="Linkfire Clicks (Daily)",
-                labels={"Date": "Date", "Visits": "Total Clicks"},
-                template="plotly_white")
-
-    # Customize the hover text
-    fig5.update_traces(
-        hovertemplate="Clicks: %{y}<extra></extra>",
-        mode="lines+markers"
-    )
+#     # CPA Comparison
+#     st.markdown("<h4 style='color: lightgreen; text-align: center;'>$10.73 LESS than 2022’s average CPA of $25.</h4>", unsafe_allow_html=True)
 
 
-    fig5.update_layout(
-        xaxis_tickangle=-45,
-        hovermode="x unified"
-    )
+#     # MANUALLY UPDATE FROM HERE
+#     linkfire_data = {
+#     "Date": [
+#         "2025-03-12T00:00:00.000Z", "2025-03-11T00:00:00.000Z", "2025-03-10T00:00:00.000Z",
+#         "2025-03-09T00:00:00.000Z", "2025-03-08T00:00:00.000Z", "2025-03-07T00:00:00.000Z",
+#         "2025-03-06T00:00:00.000Z", "2025-03-05T00:00:00.000Z", "2025-03-04T00:00:00.000Z",
+#         "2025-03-03T00:00:00.000Z", "2025-03-02T00:00:00.000Z", "2025-03-01T00:00:00.000Z",
+#         "2025-02-28T00:00:00.000Z", "2025-02-27T00:00:00.000Z", "2025-02-26T00:00:00.000Z",
+#         "2025-02-25T00:00:00.000Z"
+#     ],
+#     "Visits": [11, 5, 17, 11, 24, 61, 8, 19, 80, 52, 13, 13, 68, 48, 124, 263]
+# }
+#     df_lf = pd.DataFrame(linkfire_data)
 
-    # Display the chart in Streamlit
-    st.plotly_chart(fig5, use_container_width=True)
+#     # Ensure "Order Date" is in datetime format
+#     df_lf["Date"] = pd.to_datetime(df_lf["Date"], utc=True)
+#     df_lf["Date"] = df_lf["Date"].dt.tz_localize(None)  # Remove timezone info
+
+#     # Extract only the date part (drop time)
+#     df_lf["Date"] = df_lf["Date"].dt.date
+
+#     fig5 = px.line(df_lf, x="Date", y="Visits", markers=True, 
+#                 title="Linkfire Clicks (Daily)",
+#                 labels={"Date": "Date", "Visits": "Total Clicks"},
+#                 template="plotly_white")
+
+#     # Customize the hover text
+#     fig5.update_traces(
+#         hovertemplate="Clicks: %{y}<extra></extra>",
+#         mode="lines+markers"
+#     )
+
+
+#     fig5.update_layout(
+#         xaxis_tickangle=-45,
+#         hovermode="x unified"
+#     )
+
+#     # Display the chart in Streamlit
+#     st.plotly_chart(fig5, use_container_width=True)
