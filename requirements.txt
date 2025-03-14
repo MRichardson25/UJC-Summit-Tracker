@@ -6,3 +6,6 @@ geopandas
 folium
 streamlit-folium
 openpyxl
+geopy
+streamlit-aggrid
+python-dotenv
