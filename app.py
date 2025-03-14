@@ -7,8 +7,8 @@ import folium
 from streamlit_folium import st_folium
 import os
 import matplotlib.pyplot as plt
-from st_aggrid import AgGrid, GridOptionsBuilder
-from st_aggrid.shared import GridUpdateMode
+# from st_aggrid import AgGrid, GridOptionsBuilder
+# from st_aggrid.shared import GridUpdateMode
 from dotenv import load_dotenv
 
 # Set page config
@@ -573,49 +573,49 @@ if st.session_state.authenticated:
         col7, col8 = st.columns(2)
 
 
-        with col7:
-            # Create AgGrid options
-            gb = GridOptionsBuilder.from_dataframe(filtered_ambassador_counts)
-            gb.configure_pagination(enabled=True)  # ✅ Add pagination
-            gb.configure_side_bar()  # ✅ Enable side panel for filtering
-            gb.configure_selection(selection_mode="single")  # ✅ Allow row selection
-            gb.configure_grid_options(domLayout='autoHeight')  # ✅ Adjust height automatically
+        # with col7:
+        #     # Create AgGrid options
+        #     gb = GridOptionsBuilder.from_dataframe(filtered_ambassador_counts)
+        #     gb.configure_pagination(enabled=True)  # ✅ Add pagination
+        #     gb.configure_side_bar()  # ✅ Enable side panel for filtering
+        #     gb.configure_selection(selection_mode="single")  # ✅ Allow row selection
+        #     gb.configure_grid_options(domLayout='autoHeight')  # ✅ Adjust height automatically
 
-            # Convert options to GridOptions
-            grid_options = gb.build()
+        #     # Convert options to GridOptions
+        #     grid_options = gb.build()
 
-            # 🎯 Replace Plotly chart with AgGrid table
-            st.subheader("Ambassadors by Registrations")
+        #     # 🎯 Replace Plotly chart with AgGrid table
+        #     st.subheader("Ambassadors by Registrations")
 
-            AgGrid(
-                filtered_ambassador_counts,
-                gridOptions=grid_options,
-                enable_enterprise_modules=True,  # ✅ Enables advanced features
-                update_mode=GridUpdateMode.SELECTION_CHANGED,
-                fit_columns_on_grid_load=True,  # ✅ Auto-adjust columns
-                theme="balham",  # ✅ Set grid theme
-                )
-        with col8:
-            gb2 = GridOptionsBuilder.from_dataframe(filtered_advisor_counts)
-            gb2.configure_pagination(enabled=True)  # ✅ Add pagination
-            gb2.configure_side_bar()  # ✅ Enable side panel for filtering
-            gb2.configure_selection(selection_mode="single")  # ✅ Allow row selection
-            gb2.configure_grid_options(domLayout='autoHeight')  # ✅ Adjust height automatically
+        #     AgGrid(
+        #         filtered_ambassador_counts,
+        #         gridOptions=grid_options,
+        #         enable_enterprise_modules=True,  # ✅ Enables advanced features
+        #         update_mode=GridUpdateMode.SELECTION_CHANGED,
+        #         fit_columns_on_grid_load=True,  # ✅ Auto-adjust columns
+        #         theme="balham",  # ✅ Set grid theme
+        #         )
+        # with col8:
+        #     gb2 = GridOptionsBuilder.from_dataframe(filtered_advisor_counts)
+        #     gb2.configure_pagination(enabled=True)  # ✅ Add pagination
+        #     gb2.configure_side_bar()  # ✅ Enable side panel for filtering
+        #     gb2.configure_selection(selection_mode="single")  # ✅ Allow row selection
+        #     gb2.configure_grid_options(domLayout='autoHeight')  # ✅ Adjust height automatically
 
-            # Convert options to GridOptions
-            grid_options = gb2.build()
+        #     # Convert options to GridOptions
+        #     grid_options = gb2.build()
 
-            # 🎯 Replace Plotly chart with AgGrid table
-            st.subheader("Advisors by Registrations")
+        #     # 🎯 Replace Plotly chart with AgGrid table
+        #     st.subheader("Advisors by Registrations")
 
-            AgGrid(
-                filtered_advisor_counts,
-                gridOptions=grid_options,
-                enable_enterprise_modules=True,  # ✅ Enables advanced features
-                update_mode=GridUpdateMode.SELECTION_CHANGED,
-                fit_columns_on_grid_load=True,  # ✅ Auto-adjust columns
-                theme="balham",  # ✅ Set grid theme
-                )
+        #     AgGrid(
+        #         filtered_advisor_counts,
+        #         gridOptions=grid_options,
+        #         enable_enterprise_modules=True,  # ✅ Enables advanced features
+        #         update_mode=GridUpdateMode.SELECTION_CHANGED,
+        #         fit_columns_on_grid_load=True,  # ✅ Auto-adjust columns
+        #         theme="balham",  # ✅ Set grid theme
+        #         )
         
     with tab3:
         # Custom Static Data (Manually Updated)
