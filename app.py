@@ -56,16 +56,163 @@ for tab, instruction in instructions.items():
 
 st.sidebar.markdown("#### Collapse sidebar for a full-screen view.")
 
-#Data File References - Manually change this everyday by ~~
+def process_attendance_data(csv_file):
+    """
+    Extracts specific columns from a CSV file:
+    1. Calculates the total sum of attendees.
+    2. Returns a formatted count of Ambassador Point of Contact appearances.
+    3. Aggregates the number of attendees per date for visualization.
+
+    Args:
+        csv_file (str): Path to the CSV file.
+
+    Returns:
+        tuple: (total_attendees, ambassador_counts DataFrame, date_counts DataFrame)
+    """
+
+    # # Load CSV into a DataFrame
+    # df = pd.read_csv(csv_file)
+
+    # # Define target columns
+    # attendee_col = "How many people will be attending with your group?"
+    # ambassador_col = "Ambassador Point of Contact"
+    # timestamp_col = "Timestamp"
+
+    # # Ensure the required columns exist
+    # required_columns = [attendee_col, ambassador_col, timestamp_col]
+    # missing_columns = [col for col in required_columns if col not in df.columns]
+    # if missing_columns:
+    #     raise ValueError(f"Missing required columns in the CSV file: {missing_columns}")
+
+    # # Convert Attendee column to numeric and sum values
+    # df[attendee_col] = pd.to_numeric(df[attendee_col], errors="coerce")  # Convert invalid values to NaN
+    # total_attendees = df[attendee_col].sum(skipna=True)  # Sum valid numeric values
+
+    # # Clean Ambassador column (handle case sensitivity, strip spaces, drop NaNs)
+    # df[ambassador_col] = df[ambassador_col].astype(str).str.strip().str.lower()
+    # df = df[df[ambassador_col] != "nan"]  # Remove string "nan" (from conversion)
+
+    # # Count occurrences of each unique Ambassador
+    # ambassador_counts = df[ambassador_col].value_counts().reset_index()
+    # ambassador_counts.columns = ["Ambassador Name", "Count"]
+
+    # # Convert "Timestamp" column to datetime and extract the date
+    # df[timestamp_col] = pd.to_datetime(df[timestamp_col], utc=True, errors="coerce")
+    # df["Order Date"] = df[timestamp_col].dt.date  # Extract date (drop time)
+
+    # # Aggregate total attendees per date
+    # date_counts = df.groupby("Order Date")[attendee_col].sum().reset_index()
+    # date_counts.columns = ["Order Date", "Total Attendees"]
+    # date_counts = date_counts.sort_values("Order Date")  # Ensure chronological order
+
+    # return total_attendees, ambassador_counts, date_counts
+
+def process_attendance_data(csv_file):
+    """
+    Processes the CSV file to:
+      1. Calculate the total sum of attendees (students + non-students).
+      2. Return a count table of Ambassador Point of Contact responses.
+      3. Aggregate student registrations per date (group_dates).
+      4. Sum the non-student registrations based on empty age-range responses.
+
+    Args:
+        csv_file (str): Path to the CSV file.
+
+    Returns:
+        tuple: (total_attendees, ambassador_counts DataFrame, group_dates DataFrame, non_student_registrations)
+    """
+    
+    # Load CSV into a DataFrame
+    df = pd.read_csv(csv_file)
+
+    # Define target columns
+    attendee_col = "How many students will be attending with your group?"
+    ambassador_col = "Ambassador Point of Contact"
+    timestamp_col = "Timestamp"
+    age_range_col = "How old are the students that will be attending with your group? (Age range is acceptable)"
+    state_col = "School State (Please abbreviate, example: NJ for New Jersey)"
+    # adult_dupes = "How many chaperones will be attending with your group?"
+    # df[adult_dupes] = pd.to_numeric(df[adult_dupes], errors="coerce")
+    # num_to_remove = df[adult_dupes].sum(skipna=True)
+
+    # Ensure required columns exist
+    required_columns = [attendee_col, ambassador_col, timestamp_col, age_range_col]
+    missing_columns = [col for col in required_columns if col not in df.columns]
+    if missing_columns:
+        raise ValueError(f"Missing required columns in the CSV file: {missing_columns}")
+
+    # Convert attendee column to numeric (invalids become NaN) and compute total registrations
+    df[attendee_col] = pd.to_numeric(df[attendee_col], errors="coerce")
+    total_attendees = df[attendee_col].sum(skipna=True)
+
+    # Clean the Ambassador column (case, whitespace) and remove any "nan" string
+    df[ambassador_col] = df[ambassador_col].astype(str).str.strip().str.lower()
+    df = df[df[ambassador_col] != "nan"]
+
+    # Build the ambassador counts table
+    ambassador_counts = df[ambassador_col].value_counts().reset_index()
+    ambassador_counts.columns = ["Ambassador Name", "Count"]
+    ambassador_totals = (
+        df.groupby([ambassador_col, state_col], as_index=False)
+        .agg(
+            Count=(ambassador_col, "size"),
+            Total_Attendees=(attendee_col, "sum")
+        )
+    )
+    
+
+    # Rename the column for merging consistency
+    # ambassador_totals = ambassador_totals.rename(columns={ambassador_col: "Response"})
+    
+    # Clean the age range column:
+    # Convert to string, fill NaNs with empty string, strip spaces, and convert to lowercase.
+    df[age_range_col] = df[age_range_col].astype(str).fillna("").str.strip().str.lower()
+
+    # Define which responses indicate a non-student registration.
+    # (Empty string, "n/a", "null" are treated as non-student responses.)
+    non_student_mask = df[age_range_col].isin(["", "n/a", "null"])
+    
+    # Calculate non-student registrations by summing the attendee numbers for rows matching the non_student_mask
+    non_student_registrations = df.loc[non_student_mask, attendee_col].sum(skipna=True)
+
+    # For group_dates, assume only rows with a valid age range are considered student registrations.
+    student_df = df[~non_student_mask].copy()
+
+    # Convert Timestamp column to datetime and extract the date
+    student_df[timestamp_col] = pd.to_datetime(student_df[timestamp_col], utc=True, errors="coerce")
+    student_df["Order Date"] = student_df[timestamp_col].dt.date  # extract date only
+
+    # Aggregate total student attendees per date
+    group_dates = student_df.groupby("Order Date")[attendee_col].sum().reset_index()
+    group_dates.columns = ["Order Date", "Total Attendees"]
+    group_dates = group_dates.sort_values("Order Date")
+
+    return total_attendees, ambassador_counts, ambassador_totals, group_dates, non_student_registrations
+
+def format_name(full_name):
+    parts = full_name.split()
+    if len(parts) >= 2:
+        return f"{parts[0].capitalize()} {parts[1][0].upper()}."
+    return f"{parts[0].capitalize()}." if parts else ""
+
 
 # Custom responses to survey questions + open ended
-survey_data = ("Data/report-2025-03-14T1514.csv")
+survey_data = ("Data/report-2025-03-17T1521.csv")
 # Just the summary (orders, attendees, Name aka location)
-order_data = ("Data/Eventbrite Attendees Table - 2025-3-14.csv")
+order_data = ("Data/Eventbrite Attendees Table - 2025-3-17.csv")
+# Group survey form
+group_data = ("Data/2025 UJC Summit Group Registration Form (Responses) - Form Responses 1 (1).csv")
 
 # DO NOT CHANGE THESE REFERENCES
 data_2022 = ("Data/Perm/Summit Data Stuff - 2022 Raw.csv")
 data_2023 = ("Data/Perm/Summit Data Stuff - 2023Raw.csv")
+
+
+group_signups, group_ambassador_registrations, ambassador_totals, group_dates, non_student_registrations = process_attendance_data(group_data)
+# Apply name formatting
+group_ambassador_registrations["Ambassador Name"] = group_ambassador_registrations["Ambassador Name"].apply(format_name)
+# Aggregate counts to combine duplicate initials
+temp_ambassador_counts = group_ambassador_registrations.groupby("Ambassador Name", as_index=False)["Count"].sum()
 
 df_survey = pd.read_csv(survey_data)
 
@@ -166,7 +313,7 @@ with tab1:
     ticket_sales = ticket_data['Attendees']
 
     # Event Statistics
-    total_sales = sum(ticket_sales)
+    total_sales = sum(ticket_sales) + group_signups + non_student_registrations
     total_budget = 7000
     progress = (total_sales / total_budget) * 100
 
@@ -203,10 +350,18 @@ with tab1:
     date_counts.columns = ["Order Date", "Count"]
     date_counts = date_counts.sort_values("Order Date")  # Ensure proper chronological order
 
+    merged_dates = pd.merge(date_counts, group_dates, on="Order Date", how="outer").fillna(0)
+
+    # Sum up values from both sources
+    merged_dates["Total Registrations"] = merged_dates["Count"] + merged_dates["Total Attendees"]
+
+    # Keep only necessary columns
+    merged_dates = merged_dates[["Order Date", "Total Registrations"]]
+
     # Create interactive line chart with customized hover text
-    fig = px.line(date_counts, x="Order Date", y="Count", markers=True, 
+    fig = px.line(merged_dates, x="Order Date", y="Total Registrations", markers=True, 
                 title="Registrations Over Time (Daily)",
-                labels={"Order Date": "Date", "Count": "Total Registrations"},
+                labels={"Order Date": "Date", "Total Registrations": "Total Registrations"},
                 template="plotly_white")
 
     # Customize the hover text
@@ -234,12 +389,13 @@ with tab1:
     
     # AMBASSADOR INVITE COUNT
     #ambassadors_registered = df_survey[~df_survey['Did a UJC Ambassador Invite you to the Summit?'].astype(str).str.lower().isin(invalid_entries)].shape[0]
-    num_amb_registered = filtered_ambassador_counts["Count"].sum()
+    #related to number ambassadors registered 
+    num_amb_registered = filtered_ambassador_counts["Count"].sum() + group_signups #+ group_ambassador_registrations["Count"].sum()
 
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 4230
+    eventbrite_views = 4707
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -290,7 +446,7 @@ with tab1:
     col2, col3, col4, col5 = st.columns(4)
 
     with col2:
-        st.markdown(f'<div class="metric-box"><div class="title">Students Registered</div><div class="number pink">{students_registered:,}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-box"><div class="title">Students Registered</div><div class="number pink">{students_registered+group_signups:,}</div></div>', unsafe_allow_html=True)
 
     with col3:
         st.markdown(f'<div class="metric-box"><div class="title">Total Ambassador Registrations</div><div class="number orange">{num_amb_registered:,}</div></div>', unsafe_allow_html=True)
@@ -372,6 +528,17 @@ with tab1:
         .reset_index()
     )
 
+    #Passaic County Technical Institute is NJ 
+    #df_map.loc[df_map["StateCode"] == "NJ", "Count"] += group_signups + non_student_registrations
+    df_map.set_index("StateCode", inplace=True)  # Set index for faster lookup
+
+    for index, row in ambassador_totals.iterrows():
+        state = row["School State (Please abbreviate, example: NJ for New Jersey)"]
+        attendees = row["Total_Attendees"]
+        df_map.at[state, "Count"] += attendees  # Directly update the count
+
+    df_map.reset_index(inplace=True)  # Reset index back to normal
+
     # Create Streamlit UI
     col1, col2 = st.columns(2)  # Left column (map) is twice as wide as right column (chart)
     with col1:
@@ -404,7 +571,6 @@ with tab1:
 
     with col2:
         st.markdown("<h1 style='text-align: left;'>Top 10 States by Registrations</h1>", unsafe_allow_html=True)
-
         # Get top 10 states
         top_10_states = df_map.nlargest(10, "Count")
         top_10_states = top_10_states.sort_values(by="Count", ascending=True)
@@ -435,15 +601,26 @@ with tab1:
 
         # Show chart in Streamlit
         st.plotly_chart(fig, use_container_width=True)
-
 with tab2:
 
     col_r_3, col_r_4 = st.columns([2, 1])
     with col_r_3:
+        # temp_ambassador_counts = temp_ambassador_counts.rename(columns={"Ambassador Name": "Response"})
+        # merged_ambassadors = pd.concat([filtered_ambassador_counts, temp_ambassador_counts]).groupby("Response", as_index=False)["Count"].sum()
+        # merged_ambassadors = merged_ambassadors.sort_values(by="Count",ascending=False) 
+        ambassador_totals["Ambassador Point of Contact"] = ambassador_totals["Ambassador Point of Contact"].apply(format_name)
 
+        temp_ambassador_counts = ambassador_totals.rename(columns={
+    "Ambassador Point of Contact": "Response",
+    "Count": "Agg Number of Registrations",
+    "Total_Attendees": "Count"
+})
+        
+        merged_ambassadors = pd.concat([filtered_ambassador_counts, temp_ambassador_counts]).groupby("Response", as_index=False)["Count"].sum()
+        merged_ambassadors = merged_ambassadors.sort_values(by="Count",ascending=False) 
         st.markdown("<h1 style='text-align: left;'>Top 5 Ambassadors by Registrations</h1>", unsafe_allow_html=True)
         ## Get top 5 ambassador sources
-        top_amb = filtered_ambassador_counts.nlargest(5, "Count")  # ✅ Keep only top 5
+        top_amb = merged_ambassadors.nlargest(5, "Count")  # ✅ Keep only top 5
 
         # Create a Plotly bar chart
         fig3 = px.bar(
@@ -473,9 +650,9 @@ with tab2:
         st.plotly_chart(fig3, use_container_width=True)
     with col_r_4:
         st.markdown("<br><br><br><br>", unsafe_allow_html=True)
-        filtered_ambassador_counts = filtered_ambassador_counts.replace(r'^\s*$', None, regex=True)
-        filtered_ambassador_counts = filtered_ambassador_counts.dropna(how='all')
-        st.dataframe(filtered_ambassador_counts, height=400)
+        # filtered_ambassador_counts = filtered_ambassador_counts.replace(r'^\s*$', None, regex=True)
+        # filtered_ambassador_counts = filtered_ambassador_counts.dropna(how='all')
+        st.dataframe(merged_ambassadors, height=400)
 
     col_r_1, col_r_2 = st.columns([2, 1])
     with col_r_1:
