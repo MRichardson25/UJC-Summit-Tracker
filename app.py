@@ -197,9 +197,9 @@ def format_name(full_name):
 
 
 # Custom responses to survey questions + open ended
-survey_data = ("Data/report-2025-03-17T1521.csv")
+survey_data = ("Data/report-2025-03-18T1303.csv")
 # Just the summary (orders, attendees, Name aka location)
-order_data = ("Data/Eventbrite Attendees Table - 2025-3-17.csv")
+order_data = ("Data/Eventbrite Attendees Table - 2025-3-18.csv")
 # Group survey form
 group_data = ("Data/2025 UJC Summit Group Registration Form (Responses) - Form Responses 1 (1).csv")
 
@@ -395,7 +395,8 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 4707
+    eventbrite_views = 4792
+    previous_eventbrite_views = 4707
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -454,9 +455,29 @@ with tab1:
     with col4:
         st.markdown(f'<div class="metric-box"><div class="title">Total Advisor Registrations</div><div class="number" style="color: #FEC110;">{num_adv_registered:,}</div></div>', unsafe_allow_html=True)
 
+
+    # Calculate percentage change
+    if previous_eventbrite_views > 0:
+        percentage_change = ((eventbrite_views - previous_eventbrite_views) / previous_eventbrite_views) * 100
+    else:
+        percentage_change = 0  # Avoid division by zero
+
+    # Determine color and symbol for percentage change
+    if percentage_change > 0:
+        change_html = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {percentage_change:.2f}% from yesterday</p>'
+    elif percentage_change < 0:
+        change_html = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {abs(percentage_change):.2f}% from yesterday</p>'
+    else:
+        change_html = '<p style="font-size: 14px; color: gray; margin-top: -10px;">No change from yesterday</p>'
+
     with col5:
-        st.markdown(f'<div class="metric-box"><div class="title">Eventbrite Page Views</div><div class="number" style="color: #20D6D3;">{eventbrite_views:,}</div></div>', unsafe_allow_html=True)
-        
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">Eventbrite Page Views</div>
+                <div class="number" style="color: #20D6D3;">{eventbrite_views:,}</div>
+                {change_html}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
     st.divider()
 
     # Load attendee data
@@ -781,43 +802,44 @@ with tab3:
     #Function output reference to variables
     #duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
     df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    st.write("Example: 2022 & 2023 Repeat Attendees - Represents number of individuals who registered for both 2022 and 2023 summits.")
+    #Table names 
+    # st.write("Example: 2022 & 2023 Repeat Attendees - Represents number of individuals who registered for both 2022 and 2023 summits.")
 
-    def align_right_table(df):
-        st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
-        st.dataframe(df, height=150)
-        st.markdown("</div>", unsafe_allow_html=True)
+    # def align_right_table(df):
+    #     st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
+    #     st.dataframe(df, height=150)
+    #     st.markdown("</div>", unsafe_allow_html=True)
 
     col_6, col_7, col_8, col_9 = st.columns(4)
 
     with col_6:
         st.markdown(f'<div class="metric-box"><div class="title">2022 & 2023 Repeat Attendees</div><div class="number pink">{len(df1_res):,}</div></div>', unsafe_allow_html=True)
-        df1_res = df1_res.sort_values(by="Name") 
-        st.table(df1_res["Name"])
+        # df1_res = df1_res.sort_values(by="Name") 
+        # st.table(df1_res["Name"])
         #align_right_table(df1_res)  # Shift table position
 
 
     with col_7:
         st.markdown(f'<div class="metric-box"><div class="title"/?>2022 & 2025 Repeat Attendees</div><div class="number" style="color: #FEC110;">{len(df4_res):,}</div></div>', unsafe_allow_html=True)
         #st.text("*Number of individuals who registered in 2022 and 2025(still in progress)")
-        df4_res = df4_res.sort_values(by="Name") 
-        st.table(df4_res["Name"]) 
+        # df4_res = df4_res.sort_values(by="Name") 
+        # st.table(df4_res["Name"]) 
         #align_right_table(df4_res)  # Shift table position
 
     with col_8:
         st.markdown(f'<div class="metric-box"><div class="title">2023 & 2025 Repeat Attendees</div><div class="number orange">{len(df2_res):,}</div></div>', unsafe_allow_html=True)
         #st.write("*Number of individuals who registered in 2023 and 2025(still in progress)")
 
-        df2_res = df2_res.sort_values(by="Name") 
-        st.table(df2_res["Name"]) 
+        # df2_res = df2_res.sort_values(by="Name") 
+        # st.table(df2_res["Name"]) 
         #align_right_table(df2_res)  # Shift table position
 
     with col_9:
         st.markdown(f'<div class="metric-box"><div class="title">All 3 Summit Repeat Attendees</div><div class="number" style="color: #20D6D3;">{len(df3_res):,}</div></div>', unsafe_allow_html=True)
         #st.write("*Number of individuals who registered for all 3 summits(still in progress)")
 
-        df3_res = df3_res.sort_values(by="Name") 
-        st.table(df3_res["Name"]) 
+        # df3_res = df3_res.sort_values(by="Name") 
+        # st.table(df3_res["Name"]) 
         #align_right_table(df3_res["Name"])  # Shift table position
 
 
