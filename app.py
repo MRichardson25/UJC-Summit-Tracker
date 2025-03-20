@@ -48,7 +48,7 @@ instructions = {
     #"Paid Promotion Performance": "Analyze the impact of paid advertisements."
 }
 st.sidebar.header("UJC Summit 2025 Tracker")
-st.sidebar.markdown("### Updated 12pm daily.")
+st.sidebar.markdown("### Updated 1pm daily.")
 
 st.sidebar.markdown("### Overview:")
 for tab, instruction in instructions.items():
@@ -58,68 +58,19 @@ st.sidebar.markdown("#### Collapse sidebar for a full-screen view.")
 
 def process_attendance_data(csv_file):
     """
-    Extracts specific columns from a CSV file:
-    1. Calculates the total sum of attendees.
-    2. Returns a formatted count of Ambassador Point of Contact appearances.
-    3. Aggregates the number of attendees per date for visualization.
-
-    Args:
-        csv_file (str): Path to the CSV file.
-
-    Returns:
-        tuple: (total_attendees, ambassador_counts DataFrame, date_counts DataFrame)
-    """
-
-    # # Load CSV into a DataFrame
-    # df = pd.read_csv(csv_file)
-
-    # # Define target columns
-    # attendee_col = "How many people will be attending with your group?"
-    # ambassador_col = "Ambassador Point of Contact"
-    # timestamp_col = "Timestamp"
-
-    # # Ensure the required columns exist
-    # required_columns = [attendee_col, ambassador_col, timestamp_col]
-    # missing_columns = [col for col in required_columns if col not in df.columns]
-    # if missing_columns:
-    #     raise ValueError(f"Missing required columns in the CSV file: {missing_columns}")
-
-    # # Convert Attendee column to numeric and sum values
-    # df[attendee_col] = pd.to_numeric(df[attendee_col], errors="coerce")  # Convert invalid values to NaN
-    # total_attendees = df[attendee_col].sum(skipna=True)  # Sum valid numeric values
-
-    # # Clean Ambassador column (handle case sensitivity, strip spaces, drop NaNs)
-    # df[ambassador_col] = df[ambassador_col].astype(str).str.strip().str.lower()
-    # df = df[df[ambassador_col] != "nan"]  # Remove string "nan" (from conversion)
-
-    # # Count occurrences of each unique Ambassador
-    # ambassador_counts = df[ambassador_col].value_counts().reset_index()
-    # ambassador_counts.columns = ["Ambassador Name", "Count"]
-
-    # # Convert "Timestamp" column to datetime and extract the date
-    # df[timestamp_col] = pd.to_datetime(df[timestamp_col], utc=True, errors="coerce")
-    # df["Order Date"] = df[timestamp_col].dt.date  # Extract date (drop time)
-
-    # # Aggregate total attendees per date
-    # date_counts = df.groupby("Order Date")[attendee_col].sum().reset_index()
-    # date_counts.columns = ["Order Date", "Total Attendees"]
-    # date_counts = date_counts.sort_values("Order Date")  # Ensure chronological order
-
-    # return total_attendees, ambassador_counts, date_counts
-
-def process_attendance_data(csv_file):
-    """
     Processes the CSV file to:
       1. Calculate the total sum of attendees (students + non-students).
       2. Return a count table of Ambassador Point of Contact responses.
       3. Aggregate student registrations per date (group_dates).
       4. Sum the non-student registrations based on empty age-range responses.
+      5. Aggregate student registrations by state.
 
     Args:
         csv_file (str): Path to the CSV file.
 
     Returns:
-        tuple: (total_attendees, ambassador_counts DataFrame, group_dates DataFrame, non_student_registrations)
+        tuple: (total_attendees, ambassador_counts, ambassador_totals, group_dates, 
+                non_student_registrations, state_totals)
     """
     
     # Load CSV into a DataFrame
@@ -129,29 +80,27 @@ def process_attendance_data(csv_file):
     attendee_col = "How many students will be attending with your group?"
     ambassador_col = "Ambassador Point of Contact"
     timestamp_col = "Timestamp"
-    age_range_col = "How old are the students that will be attending with your group? (Age range is acceptable)"
     state_col = "School State (Please abbreviate, example: NJ for New Jersey)"
-    # adult_dupes = "How many chaperones will be attending with your group?"
-    # df[adult_dupes] = pd.to_numeric(df[adult_dupes], errors="coerce")
-    # num_to_remove = df[adult_dupes].sum(skipna=True)
 
     # Ensure required columns exist
-    required_columns = [attendee_col, ambassador_col, timestamp_col, age_range_col]
+    required_columns = [attendee_col, ambassador_col, timestamp_col, state_col]
     missing_columns = [col for col in required_columns if col not in df.columns]
     if missing_columns:
         raise ValueError(f"Missing required columns in the CSV file: {missing_columns}")
 
-    # Convert attendee column to numeric (invalids become NaN) and compute total registrations
+    # Convert attendee column to numeric and compute total registrations
     df[attendee_col] = pd.to_numeric(df[attendee_col], errors="coerce")
     total_attendees = df[attendee_col].sum(skipna=True)
 
-    # Clean the Ambassador column (case, whitespace) and remove any "nan" string
+    # Clean and process Ambassador column
     df[ambassador_col] = df[ambassador_col].astype(str).str.strip().str.lower()
     df = df[df[ambassador_col] != "nan"]
 
     # Build the ambassador counts table
     ambassador_counts = df[ambassador_col].value_counts().reset_index()
     ambassador_counts.columns = ["Ambassador Name", "Count"]
+
+    # Group ambassador totals by state
     ambassador_totals = (
         df.groupby([ambassador_col, state_col], as_index=False)
         .agg(
@@ -159,26 +108,18 @@ def process_attendance_data(csv_file):
             Total_Attendees=(attendee_col, "sum")
         )
     )
-    
 
-    # Rename the column for merging consistency
-    # ambassador_totals = ambassador_totals.rename(columns={ambassador_col: "Response"})
-    
-    # Clean the age range column:
-    # Convert to string, fill NaNs with empty string, strip spaces, and convert to lowercase.
-    df[age_range_col] = df[age_range_col].astype(str).fillna("").str.strip().str.lower()
+    # Clean state column
+    df[state_col] = df[state_col].astype(str).fillna("").str.strip().str.upper()
 
-    # Define which responses indicate a non-student registration.
-    # (Empty string, "n/a", "null" are treated as non-student responses.)
-    non_student_mask = df[age_range_col].isin(["", "n/a", "null"])
-    
-    # Calculate non-student registrations by summing the attendee numbers for rows matching the non_student_mask
+    # Identify non-student registrations
+    non_student_mask = df[state_col].isin(["", "N/A", "NULL"])
     non_student_registrations = df.loc[non_student_mask, attendee_col].sum(skipna=True)
 
-    # For group_dates, assume only rows with a valid age range are considered student registrations.
+    # Filter only student registrations
     student_df = df[~non_student_mask].copy()
 
-    # Convert Timestamp column to datetime and extract the date
+    # Convert Timestamp column to datetime and extract date
     student_df[timestamp_col] = pd.to_datetime(student_df[timestamp_col], utc=True, errors="coerce")
     student_df["Order Date"] = student_df[timestamp_col].dt.date  # extract date only
 
@@ -187,7 +128,12 @@ def process_attendance_data(csv_file):
     group_dates.columns = ["Order Date", "Total Attendees"]
     group_dates = group_dates.sort_values("Order Date")
 
-    return total_attendees, ambassador_counts, ambassador_totals, group_dates, non_student_registrations
+    # Aggregate student registrations by state
+    state_totals = student_df.groupby(state_col)[attendee_col].sum().reset_index()
+    state_totals.columns = ["StateCode", "Total_Attendees"]
+
+    return total_attendees, ambassador_counts, ambassador_totals, group_dates, non_student_registrations, state_totals
+
 
 def format_name(full_name):
     parts = full_name.split()
@@ -197,18 +143,14 @@ def format_name(full_name):
 
 
 # Custom responses to survey questions + open ended
-survey_data = ("Data/Untitled spreadsheet - report-2025-03-18T1303.csv")
+survey_data = ("Data/Eventbrite Survey - 320 report.csv")
 # Just the summary (orders, attendees, Name aka location)
-order_data = ("Data/Eventbrite Attendees Table - 2025-3-18.csv")
+order_data = ("Data/Eventbrite Attendees Table - 2025-3-20.csv")
 # Group survey form
-group_data = ("Data/2025 UJC Summit Group Registration Form (Responses) - Form Responses 1 (1).csv")
+group_data = ("Data/Eventbrite Survey - group surv.csv")
 
-# DO NOT CHANGE THESE REFERENCES
-data_2022 = ("Data/Perm/Summit Data Stuff - 2022 Raw.csv")
-data_2023 = ("Data/Perm/Summit Data Stuff - 2023Raw.csv")
-
-
-group_signups, group_ambassador_registrations, ambassador_totals, group_dates, non_student_registrations = process_attendance_data(group_data)
+#Change here order may not be right for function!!!!!!
+group_signups, group_ambassador_registrations, ambassador_totals, group_dates, non_student_registrations, state_totals = process_attendance_data(group_data)
 # Apply name formatting
 group_ambassador_registrations["Ambassador Name"] = group_ambassador_registrations["Ambassador Name"].apply(format_name)
 # Aggregate counts to combine duplicate initials
@@ -395,8 +337,10 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 4792
-    previous_eventbrite_views = 4707
+    eventbrite_views = 4947
+    previous_eventbrite_views = 4792
+    df1_res, df4_res, df2_res, df3_res = 690, 227, 797, 169
+    df1_old, df4_old, df2_old, df3_old = 690, 227, 790, 169
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -406,18 +350,18 @@ with tab1:
     exclude_words = ["colleague", "friend", "aware"]
 
 # Function to check if a response should be included
-    def should_include(response):
-        response_lower = response.lower() if isinstance(response, str) else ""
+    # def should_include(response):
+    #     response_lower = response.lower() if isinstance(response, str) else ""
         
-        # Check if any include word is present
-        if any(word in response_lower for word in include_words):
-            # Ensure no exclude words are present
-            if not any(word in response_lower for word in exclude_words):
-                return True
-        return False
-    filtered_prev_attendees = df_survey[df_survey["If you answered \"Other\" to the. previous question -"].apply(should_include)]
-    prev_attendee_response = len(filtered_prev_attendees)
-    #st.table(filtered_prev_attendees)
+    #     # Check if any include word is present
+    #     if any(word in response_lower for word in include_words):
+    #         # Ensure no exclude words are present
+    #         if not any(word in response_lower for word in exclude_words):
+    #             return True
+    #     return False
+    # filtered_prev_attendees = df_survey[df_survey["If you answered \"Other\" to the. previous question -"].apply(should_include)]
+    # prev_attendee_response = len(filtered_prev_attendees)
+    # #st.table(filtered_prev_attendees)
 
     custom_css = """
     <style>
@@ -445,7 +389,7 @@ with tab1:
 
     # Create columns for metrics
     col2, col3, col4, col5 = st.columns(4)
-
+    #s_r = 
     with col2:
         st.markdown(f'<div class="metric-box"><div class="title">Students Registered</div><div class="number pink">{students_registered+group_signups:,}</div></div>', unsafe_allow_html=True)
 
@@ -455,7 +399,7 @@ with tab1:
     with col4:
         st.markdown(f'<div class="metric-box"><div class="title">Total Advisor Registrations</div><div class="number" style="color: #FEC110;">{num_adv_registered:,}</div></div>', unsafe_allow_html=True)
 
-
+    views_diff = eventbrite_views-previous_eventbrite_views
     # Calculate percentage change
     if previous_eventbrite_views > 0:
         percentage_change = ((eventbrite_views - previous_eventbrite_views) / previous_eventbrite_views) * 100
@@ -464,9 +408,9 @@ with tab1:
 
     # Determine color and symbol for percentage change
     if percentage_change > 0:
-        change_html = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {percentage_change:.2f}% from yesterday</p>'
+        change_html = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {views_diff}, ({percentage_change:.1f}%) from yesterday</p>'
     elif percentage_change < 0:
-        change_html = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {abs(percentage_change):.2f}% from yesterday</p>'
+        change_html = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {views_diff} ({abs(percentage_change):.2f}%) from yesterday</p>'
     else:
         change_html = '<p style="font-size: 14px; color: gray; margin-top: -10px;">No change from yesterday</p>'
 
@@ -549,16 +493,19 @@ with tab1:
         .reset_index()
     )
 
-    #Passaic County Technical Institute is NJ 
-    #df_map.loc[df_map["StateCode"] == "NJ", "Count"] += group_signups + non_student_registrations
     df_map.set_index("StateCode", inplace=True)  # Set index for faster lookup
 
-    for index, row in ambassador_totals.iterrows():
-        state = row["School State (Please abbreviate, example: NJ for New Jersey)"]
+    # Integrate state-level student registrations
+    for index, row in state_totals.iterrows():
+        state = row["StateCode"]
         attendees = row["Total_Attendees"]
-        df_map.at[state, "Count"] += attendees  # Directly update the count
+        if state in df_map.index:
+            df_map.at[state, "Count"] += attendees  # Directly update the count
+        else:
+            df_map.loc[state] = [None, None, attendees]  # Add new state if missing
 
     df_map.reset_index(inplace=True)  # Reset index back to normal
+
 
     # Create Streamlit UI
     col1, col2 = st.columns(2)  # Left column (map) is twice as wide as right column (chart)
@@ -752,56 +699,11 @@ with tab2:
         filtered_hearing_source_counts = filtered_hearing_source_counts.dropna(how='all')
         st.dataframe(filtered_hearing_source_counts, height=400) 
     col7, col8 = st.columns(2)
-
-
-    # with col7:
-    #     # Create AgGrid options
-    #     gb = GridOptionsBuilder.from_dataframe(filtered_ambassador_counts)
-    #     gb.configure_pagination(enabled=True)  # ✅ Add pagination
-    #     gb.configure_side_bar()  # ✅ Enable side panel for filtering
-    #     gb.configure_selection(selection_mode="single")  # ✅ Allow row selection
-    #     gb.configure_grid_options(domLayout='autoHeight')  # ✅ Adjust height automatically
-
-    #     # Convert options to GridOptions
-    #     grid_options = gb.build()
-
-    #     # 🎯 Replace Plotly chart with AgGrid table
-    #     st.subheader("Ambassadors by Registrations")
-
-    #     AgGrid(
-    #         filtered_ambassador_counts,
-    #         gridOptions=grid_options,
-    #         enable_enterprise_modules=True,  # ✅ Enables advanced features
-    #         update_mode=GridUpdateMode.SELECTION_CHANGED,
-    #         fit_columns_on_grid_load=True,  # ✅ Auto-adjust columns
-    #         theme="balham",  # ✅ Set grid theme
-    #         )
-    # with col8:
-    #     gb2 = GridOptionsBuilder.from_dataframe(filtered_advisor_counts)
-    #     gb2.configure_pagination(enabled=True)  # ✅ Add pagination
-    #     gb2.configure_side_bar()  # ✅ Enable side panel for filtering
-    #     gb2.configure_selection(selection_mode="single")  # ✅ Allow row selection
-    #     gb2.configure_grid_options(domLayout='autoHeight')  # ✅ Adjust height automatically
-
-    #     # Convert options to GridOptions
-    #     grid_options = gb2.build()
-
-    #     # 🎯 Replace Plotly chart with AgGrid table
-    #     st.subheader("Advisors by Registrations")
-
-    #     AgGrid(
-    #         filtered_advisor_counts,
-    #         gridOptions=grid_options,
-    #         enable_enterprise_modules=True,  # ✅ Enables advanced features
-    #         update_mode=GridUpdateMode.SELECTION_CHANGED,
-    #         fit_columns_on_grid_load=True,  # ✅ Auto-adjust columns
-    #         theme="balham",  # ✅ Set grid theme
-    #         )
     
 with tab3:
     #Function output reference to variables
     #duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
-    df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
+    # df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     #Table names 
     # st.write("Example: 2022 & 2023 Repeat Attendees - Represents number of individuals who registered for both 2022 and 2023 summits.")
 
@@ -812,118 +714,113 @@ with tab3:
 
     col_6, col_7, col_8, col_9 = st.columns(4)
 
-    with col_6:
-        st.markdown(f'<div class="metric-box"><div class="title">2022 & 2023 Repeat Attendees</div><div class="number pink">{len(df1_res):,}</div></div>', unsafe_allow_html=True)
-        # df1_res = df1_res.sort_values(by="Name") 
-        # st.table(df1_res["Name"])
-        #align_right_table(df1_res)  # Shift table position
+    # Define old and new values
+    df1_res, df4_res, df2_res, df3_res = 690, 227, 797, 169
+    df1_old, df4_old, df2_old, df3_old = 690, 227, 790, 169
 
+    # Create dictionaries for iteration
+    old_values = {'df1': df1_old, 'df4': df4_old, 'df2': df2_old, 'df3': df3_old}
+    new_values = {'df1': df1_res, 'df4': df4_res, 'df2': df2_res, 'df3': df3_res}
+
+    # Dictionary to store percent changes
+    percent_changes = {}
+    differences = []
+
+    # Calculate percent change iteratively
+    for key in old_values:
+        old = old_values[key]
+        new = new_values[key]
+
+        difference = new - old
+        differences.append(difference)
+        
+        # Avoid division by zero
+        if new == old:
+            change = 0.0
+        elif old != 0:
+            change = ((new - old) / old) * 100
+        else:
+            change = None  # If old value is 0, percent change is undefined
+
+        percent_changes[f"{key}_change"] = change
+         
+
+    # Assign values to individual variables
+    df1_change, df4_change, df2_change, df3_change = (
+        percent_changes["df1_change"],
+        percent_changes["df4_change"],
+        percent_changes["df2_change"],
+        percent_changes["df3_change"]
+    )
+    print(differences)
+
+    with col_6:
+         
+        # Determine color and symbol for percentage change
+        if df1_change > 0:
+            change_html1 = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {differences[0]} ({df1_change:.2f}%) from yesterday</p>'
+        elif df1_change < 0:
+            change_html1 = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {differences[0]} ({abs(df1_change):.2f}%) from yesterday</p>'
+        else:
+            change_html1 = f'<p style="font-size: 14px; color: gray; margin-top: -10px;">{differences[0]}, No change from yesterday</p>'
+        
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">2022 & 2023 Repeat Attendees</div>
+                <div class="number pink";">{df1_res:,}</div>
+                {change_html1}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
+
+            #st.markdown(f'<div class="metric-box"><div class="title">2022 & 2023 Repeat Attendees</div><div class="number pink">{(df1_change):,}</div></div>', unsafe_allow_html=True)
+            # df1_res = df1_res.sort_values(by="Name") 
+            # st.table(df1_res["Name"])
+            #align_right_table(df1_res)  # Shift table position
 
     with col_7:
-        st.markdown(f'<div class="metric-box"><div class="title"/?>2022 & 2025 Repeat Attendees</div><div class="number" style="color: #FEC110;">{len(df4_res):,}</div></div>', unsafe_allow_html=True)
-        #st.text("*Number of individuals who registered in 2022 and 2025(still in progress)")
-        # df4_res = df4_res.sort_values(by="Name") 
-        # st.table(df4_res["Name"]) 
-        #align_right_table(df4_res)  # Shift table position
+        if df4_change > 0:
+            change_html2 = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {differences[1]} ({df4_change:.2f}%) from yesterday</p>'
+        elif df4_change < 0:
+            change_html2 = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {differences[1]} ({abs(df4_change):.2f}%) from yesterday</p>'
+        else:
+            change_html2 = f'<p style="font-size: 14px; color: gray; margin-top: -10px;">{differences[1]}, No change from yesterday</p>'
+        
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">2022 & 2023 Repeat Attendees</div>
+                <div class="number" style="color: #FEC110;">{df4_res:,}</div>
+                {change_html2}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
 
     with col_8:
-        st.markdown(f'<div class="metric-box"><div class="title">2023 & 2025 Repeat Attendees</div><div class="number orange">{len(df2_res):,}</div></div>', unsafe_allow_html=True)
-        #st.write("*Number of individuals who registered in 2023 and 2025(still in progress)")
-
-        # df2_res = df2_res.sort_values(by="Name") 
-        # st.table(df2_res["Name"]) 
-        #align_right_table(df2_res)  # Shift table position
+        if df2_change > 0:
+            change_html3 = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {differences[2]} ({df2_change:.2f}%) from yesterday</p>'
+        elif df2_change < 0:
+            change_html3 = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {differences[2]} ({abs(df2_change):.2f}%) from yesterday</p>'
+        else:
+            change_html3 = f'<p style="font-size: 14px; color: gray; margin-top: -10px;">{differences[2]}, No change from yesterday</p>'
+        
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">2022 & 2023 Repeat Attendees</div>
+                <div class="number orange">{df2_res:,}</div>
+                {change_html3}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
 
     with col_9:
-        st.markdown(f'<div class="metric-box"><div class="title">All 3 Summit Repeat Attendees</div><div class="number" style="color: #20D6D3;">{len(df3_res):,}</div></div>', unsafe_allow_html=True)
-        #st.write("*Number of individuals who registered for all 3 summits(still in progress)")
-
-        # df3_res = df3_res.sort_values(by="Name") 
-        # st.table(df3_res["Name"]) 
-        #align_right_table(df3_res["Name"])  # Shift table position
-
-
-    # col_10, col_11, col_12, col_13 = st.columns(4)
-    # with col_10:
-    #         st.dataframe(df1_res["Name"], height=400) 
-    # with col_11:
-    #     st.dataframe(df4_res["Name"], height=400) 
-    # with col_12:
-    #     st.dataframe(df2_res["Name"], height=400) 
-    # with col_13:
-    #     st.dataframe(df3_res["Name"], height=400) 
-    # Custom Static Data (Manually Updated)
-#     ad_list = [
-#     ["UJC Website", "$0.00", "3,009", "326", "10.4%", "$0.00"],
-#     ["Google (Performance Max)", "$842.65", "85,289", "8,500", "17", "$49.57"],
-#     ["Google (Search Standard)", "$460.22", "313", "14", "2", "$230.11"],
-#     ["Facebook", "$12,080.02", "509,997", "5,635", "815", "$14.82"],
-#     ["Instagram", "$8,730.96", "364,022", "2,468", "723", "$12.08"],
-#     ["LinkedIn", "$282.72", "10,261", "73", "0", "$0.00"],
-#     ["TikTok", "$79.79", "11,795", "38", "0", "$0.00"],
-#     ["Total", "$22,473.13", "982,089", "16,734", "1,557", "$14.27"]]
-    
-#     columns = ["Platform", "Spend", "Impressions", "Link Clicks", "Conversion Rate(%)", "Cost Per Action (CPA)"]
-#     df_ad = pd.DataFrame(ad_list, columns= columns)
-
-#     # Title and Header Styling
-#     st.markdown("<h1 style='text-align: center; color: white;'>Total Registrations from Ads</h1>", unsafe_allow_html=True)
-
-#     col_1, col_2 = st.columns(2)
-
-#     with col_1:
-#         st.markdown("<h2 style='color: orange; font-size: 60px; text-align: center;'>1,557</h2>", unsafe_allow_html=True)
-#         st.markdown("<h4 style='text-align: center; color: white;'>Total Registrations</h4>", unsafe_allow_html=True)
-
-#     with col_2:
-#         st.markdown("<h2 style='color: pink; font-size: 60px; text-align: center;'>$14.27</h2>", unsafe_allow_html=True)
-#         st.markdown("<h4 style='text-align: center; color: white;'>Average Cost-Per-Action (Registration)</h4>", unsafe_allow_html=True)
-
-#     # Table Display
-#     st.markdown("<h3 style='color: white;'>Advertising Performance Overview</h3>", unsafe_allow_html=True)
-#     st.dataframe(df_ad.style.set_properties(**{'background-color': 'black', 'color': 'white', 'border-color': 'white'}))
-
-#     # CPA Comparison
-#     st.markdown("<h4 style='color: lightgreen; text-align: center;'>$10.73 LESS than 2022’s average CPA of $25.</h4>", unsafe_allow_html=True)
-
-
-#     # MANUALLY UPDATE FROM HERE
-#     linkfire_data = {
-#     "Date": [
-#         "2025-03-12T00:00:00.000Z", "2025-03-11T00:00:00.000Z", "2025-03-10T00:00:00.000Z",
-#         "2025-03-09T00:00:00.000Z", "2025-03-08T00:00:00.000Z", "2025-03-07T00:00:00.000Z",
-#         "2025-03-06T00:00:00.000Z", "2025-03-05T00:00:00.000Z", "2025-03-04T00:00:00.000Z",
-#         "2025-03-03T00:00:00.000Z", "2025-03-02T00:00:00.000Z", "2025-03-01T00:00:00.000Z",
-#         "2025-02-28T00:00:00.000Z", "2025-02-27T00:00:00.000Z", "2025-02-26T00:00:00.000Z",
-#         "2025-02-25T00:00:00.000Z"
-#     ],
-#     "Visits": [11, 5, 17, 11, 24, 61, 8, 19, 80, 52, 13, 13, 68, 48, 124, 263]
-# }
-#     df_lf = pd.DataFrame(linkfire_data)
-
-#     # Ensure "Order Date" is in datetime format
-#     df_lf["Date"] = pd.to_datetime(df_lf["Date"], utc=True)
-#     df_lf["Date"] = df_lf["Date"].dt.tz_localize(None)  # Remove timezone info
-
-#     # Extract only the date part (drop time)
-#     df_lf["Date"] = df_lf["Date"].dt.date
-
-#     fig5 = px.line(df_lf, x="Date", y="Visits", markers=True, 
-#                 title="Linkfire Clicks (Daily)",
-#                 labels={"Date": "Date", "Visits": "Total Clicks"},
-#                 template="plotly_white")
-
-#     # Customize the hover text
-#     fig5.update_traces(
-#         hovertemplate="Clicks: %{y}<extra></extra>",
-#         mode="lines+markers"
-#     )
-
-
-#     fig5.update_layout(
-#         xaxis_tickangle=-45,
-#         hovermode="x unified"
-#     )
-
-#     # Display the chart in Streamlit
-#     st.plotly_chart(fig5, use_container_width=True)
+        if df3_change > 0:
+            change_html4 = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {differences[3]} ({df3_change:.2f}%) from yesterday</p>'
+        elif df3_change < 0:
+            change_html4 = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {differences[3]} ({abs(df3_change):.2f}%) from yesterday</p>'
+        else:
+            change_html4 = f'<p style="font-size: 14px; color: gray; margin-top: -10px;">{differences[3]}, No change from yesterday</p>'
+        
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">2022 & 2023 Repeat Attendees</div>
+                <div class="number" style="color: #20D6D3;">{df3_res:,}</div>
+                {change_html4}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
