@@ -752,7 +752,6 @@ with tab3:
         percent_changes["df2_change"],
         percent_changes["df3_change"]
     )
-    print(differences)
 
     with col_6:
          
