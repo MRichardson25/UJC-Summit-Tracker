@@ -806,7 +806,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">2023 & 2025 Repeat Registrations</div>
+                <div class="title">2023 & 2025 Repeat Registrants </div>
                 <div class="number orange">{df2_res:,}</div>
                 {change_html3}  <!-- Inject percentage change here -->
             </div>
@@ -822,7 +822,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">All 3 Summit Repeat Registrations</div>
+                <div class="title">All 3 Summit Repeat Registrants</div>
                 <div class="number" style="color: #20D6D3;">{df3_res:,}</div>
                 {change_html4}  <!-- Inject percentage change here -->
             </div>
