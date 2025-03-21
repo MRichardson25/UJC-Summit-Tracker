@@ -48,7 +48,7 @@ instructions = {
     #"Paid Promotion Performance": "Analyze the impact of paid advertisements."
 }
 st.sidebar.header("UJC Summit 2025 Tracker")
-st.sidebar.markdown("### Updated 1pm daily.")
+st.sidebar.markdown("### Updated 12pm daily.")
 
 st.sidebar.markdown("### Overview:")
 for tab, instruction in instructions.items():
