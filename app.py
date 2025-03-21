@@ -42,9 +42,9 @@ tab1, tab2, tab3 = st.tabs(tabs)
 
 # Sidebar instructions
 instructions = {
-    "Event Tracker": "Track event registrations by date, location, and repeat attendees across previous summits.",
+    "Event Tracker": "Track event registrations by date, location, and by type (student, ambassador referral, advisor referral).",
     "Registration Leaderboard": "View the top contributors and sources driving the most registrations.",
-    "Repeat Attendees": "View the count and names of individuals who registered for previous summits."
+    "Repeat Registrants": "View the number of individuals who registered for previous summits."
     #"Paid Promotion Performance": "Analyze the impact of paid advertisements."
 }
 st.sidebar.header("UJC Summit 2025 Tracker")
