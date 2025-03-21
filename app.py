@@ -754,7 +754,6 @@ with tab3:
     )
 
     with col_6:
-         
         # Determine color and symbol for percentage change
         if df1_change > 0:
             change_html1 = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {differences[0]} ({df1_change:.2f}%) from yesterday</p>'
@@ -786,7 +785,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">2022 & 2023 Repeat Attendees</div>
+                <div class="title">2022 & 2025 Repeat Attendees</div>
                 <div class="number" style="color: #FEC110;">{df4_res:,}</div>
                 {change_html2}  <!-- Inject percentage change here -->
             </div>
@@ -802,7 +801,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">2022 & 2023 Repeat Attendees</div>
+                <div class="title">2023 & 2025 Repeat Attendees</div>
                 <div class="number orange">{df2_res:,}</div>
                 {change_html3}  <!-- Inject percentage change here -->
             </div>
@@ -818,7 +817,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">2022 & 2023 Repeat Attendees</div>
+                <div class="title">All 3 Summit Repeat Attendees</div>
                 <div class="number" style="color: #20D6D3;">{df3_res:,}</div>
                 {change_html4}  <!-- Inject percentage change here -->
             </div>
