@@ -715,8 +715,6 @@ with tab3:
     col_6, col_7, col_8, col_9 = st.columns(4)
 
     # Define old and new values
-    df1_res, df4_res, df2_res, df3_res = 690, 227, 797, 169
-    df1_old, df4_old, df2_old, df3_old = 690, 227, 790, 169
 
     # Create dictionaries for iteration
     old_values = {'df1': df1_old, 'df4': df4_old, 'df2': df2_old, 'df3': df3_old}
