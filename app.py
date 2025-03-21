@@ -37,7 +37,7 @@ load_dotenv()
 #     st.success("Access Granted!")
 st.write("Welcome to the UJC Summit 2025 Dashboard!")
 
-tabs = ["Event Tracker", "Registration Leaderboard", "Repeat Attendees"] #Paid Promotion Performance
+tabs = ["Event Tracker", "Registration Leaderboard", "Repeat Registrants"] #Paid Promotion Performance
 tab1, tab2, tab3 = st.tabs(tabs)
 
 # Sidebar instructions
@@ -769,7 +769,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">2022 & 2023 Repeat Attendees</div>
+                <div class="title">2022 & 2023 Repeat Registrants</div>
                 <div class="number pink";">{df1_res:,}</div>
                 {change_html1}  <!-- Inject percentage change here -->
             </div>
@@ -790,7 +790,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">2022 & 2025 Repeat Attendees</div>
+                <div class="title">2022 & 2025 Repeat Registrants</div>
                 <div class="number" style="color: #FEC110;">{df4_res:,}</div>
                 {change_html2}  <!-- Inject percentage change here -->
             </div>
@@ -806,7 +806,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">2023 & 2025 Repeat Attendees</div>
+                <div class="title">2023 & 2025 Repeat Registrations</div>
                 <div class="number orange">{df2_res:,}</div>
                 {change_html3}  <!-- Inject percentage change here -->
             </div>
@@ -822,7 +822,7 @@ with tab3:
         
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">All 3 Summit Repeat Attendees</div>
+                <div class="title">All 3 Summit Repeat Registrations</div>
                 <div class="number" style="color: #20D6D3;">{df3_res:,}</div>
                 {change_html4}  <!-- Inject percentage change here -->
             </div>
