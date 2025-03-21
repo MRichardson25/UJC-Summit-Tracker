@@ -617,6 +617,8 @@ with tab2:
         # Show chart in Streamlit
         st.plotly_chart(fig3, use_container_width=True)
     with col_r_4:
+        merged_ambassadors = merged_ambassadors.reset_index(drop=True)
+        merged_ambassadors.index = merged_ambassadors.index + 1
         st.markdown("<br><br><br><br>", unsafe_allow_html=True)
         # filtered_ambassador_counts = filtered_ambassador_counts.replace(r'^\s*$', None, regex=True)
         # filtered_ambassador_counts = filtered_ambassador_counts.dropna(how='all')
@@ -655,8 +657,11 @@ with tab2:
         st.plotly_chart(fig2, use_container_width=True)
 
     with col_r_2:
+        filtered_advisor_counts = filtered_advisor_counts.reset_index(drop=True)
+        filtered_advisor_counts.index = filtered_advisor_counts.index + 1
         st.markdown("<br><br><br><br>", unsafe_allow_html=True)
         st.dataframe(filtered_advisor_counts, height=400) 
+        
 
     col_r_5, col_r_6 = st.columns([2, 1])
     with col_r_5:
@@ -695,6 +700,8 @@ with tab2:
         # Get top 5 ambassador sources
 
     with col_r_6:
+        filtered_hearing_source_counts = filtered_hearing_source_counts.reset_index(drop=True)
+        filtered_hearing_source_counts.index = filtered_hearing_source_counts.index + 1
         st.markdown("<br><br><br><br>", unsafe_allow_html=True)
         filtered_hearing_source_counts = filtered_hearing_source_counts.dropna(how='all')
         st.dataframe(filtered_hearing_source_counts, height=400) 
