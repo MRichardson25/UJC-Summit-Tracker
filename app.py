@@ -143,9 +143,9 @@ def format_name(full_name):
 
 
 # Custom responses to survey questions + open ended
-survey_data = ("Data/Eventbrite Survey - 321 report.csv")
+survey_data = ("Data/Eventbrite Survey - 324 report.csv")
 # Just the summary (orders, attendees, Name aka location)
-order_data = ("Data/Eventbrite Attendees Table - 2025-3-21.csv")
+order_data = ("Data/Eventbrite Attendees Table - 2025-3-24.csv")
 # Group survey form
 group_data = ("Data/Eventbrite Survey - group surv.csv")
 
@@ -337,10 +337,10 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 5007
-    previous_eventbrite_views = 4947
-    df1_res, df4_res, df2_res, df3_res = 690, 229, 801, 171
-    df1_old, df4_old, df2_old, df3_old = 690, 227, 797, 169
+    eventbrite_views = 5282
+    previous_eventbrite_views = 5007
+    df1_res, df4_res, df2_res, df3_res = 690, 235, 820, 176
+    df1_old, df4_old, df2_old, df3_old = 690, 229, 801, 171
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
