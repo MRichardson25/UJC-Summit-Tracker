@@ -9,3 +9,4 @@ openpyxl
 geopy
 streamlit-aggrid
 python-dotenv
+pydomo
