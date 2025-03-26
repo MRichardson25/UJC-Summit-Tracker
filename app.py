@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from datetime import datetime
+from datetime import datetime, timedelta
 import folium
 from streamlit_folium import st_folium
 import os
@@ -10,11 +10,37 @@ import matplotlib.pyplot as plt
 # from st_aggrid import AgGrid, GridOptionsBuilder
 # from st_aggrid.shared import GridUpdateMode
 from dotenv import load_dotenv
+from pydomo import Domo
 
 # Set page config
 st.set_page_config(page_title="UJC Summit Registration Tracker Dashboard", layout="wide")
 
-load_dotenv()
+# Utility: Generate a "refresh token" that only changes on Fridays
+def get_friday_token():
+    today = datetime.now()
+    if today.weekday() == 4:  # Friday is weekday 4
+        return today.strftime("%Y-%m-%d")
+    else:
+        return "no-refresh"
+
+# # Cache the Domo pull, but only refresh on Fridays
+# @st.cache_data
+# def get_domo_data(refresh_token):  # passing token makes Streamlit recache
+#     load_dotenv()
+#     client_id = os.getenv("DOMO_CLIENT_ID")
+#     client_secret = os.getenv("DOMO_CLIENT_SECRET")
+#     api_host = os.getenv("DOMO_API_HOST", "api.domo.com")  # fallback to default if not set
+#     dataset_id = os.getenv("DOMO_DATASET_ID")
+
+#     domo = Domo(client_id, client_secret, api_host=api_host)
+#     data = domo.ds_get(dataset_id)
+#     df = pd.DataFrame(data)
+#     return df
+
+# # Use the token to control refresh
+# refresh_token = get_friday_token()
+# data_domo = get_domo_data(refresh_token)
+
 # PASSWORD = os.getenv("STREAMLIT_PASSWORD")
 
 # Initialize session state
@@ -37,8 +63,8 @@ load_dotenv()
 #     st.success("Access Granted!")
 st.write("Welcome to the UJC Summit 2025 Dashboard!")
 
-tabs = ["Event Tracker", "Registration Leaderboard", "Repeat Registrants"] #Paid Promotion Performance
-tab1, tab2, tab3 = st.tabs(tabs)
+tabs = ["Event Tracker", "Registration Leaderboard", "Repeat Registrants", "Paid Promotion Performance"]
+tab1, tab2, tab3, tab4 = st.tabs(tabs)
 
 # Sidebar instructions
 instructions = {
@@ -143,9 +169,18 @@ def format_name(full_name):
 
 
 # Custom responses to survey questions + open ended
-survey_data = ("Data/Eventbrite Survey - 324 report.csv")
+load_dotenv() 
+if "REPORT_URL" in os.environ:
+    survey_data = os.getenv("REPORT_URL")
+else:
+    survey_data = st.secrets["REPORT_URL"]
+#survey_data = os.getenv("REPORT_URL")#("Data/Eventbrite Survey - 324 report.csv")
 # Just the summary (orders, attendees, Name aka location)
-order_data = ("Data/Eventbrite Attendees Table - 2025-3-24.csv")
+if "TABLE_URL" in os.environ:
+    order_data = os.getenv("TABLE_URL")
+else:
+    order_data = st.secrets["TABLE_URL"]
+#order_data = os.getenv("TABLE_URL") #("Data/Eventbrite Attendees Table - 2025-3-24.csv")
 # Group survey form
 group_data = ("Data/Eventbrite Survey - group surv.csv")
 
@@ -337,10 +372,10 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 5282
-    previous_eventbrite_views = 5007
-    df1_res, df4_res, df2_res, df3_res = 690, 235, 820, 176
-    df1_old, df4_old, df2_old, df3_old = 690, 229, 801, 171
+    eventbrite_views = 5642
+    previous_eventbrite_views = 5282
+    df1_res, df4_res, df2_res, df3_res = 690, 237, 830, 178
+    df1_old, df4_old, df2_old, df3_old = 690, 235, 820, 176
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -827,3 +862,65 @@ with tab3:
                 {change_html4}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True)
+
+
+with tab4:
+    st.write("[Work In Progress]")
+    # df_domo = pd.DataFrame(data_domo)
+    # st.dataframe(df_domo)
+    load_dotenv() 
+    url_1 = os.getenv("DROPBOX_URL")
+    def get_cached_data(url):
+        return pd.read_csv(url)
+    df_domo = get_cached_data(url_1)
+    # Define a helper to clean numeric columns
+    def clean_numeric(series, force_int=False):
+    # Step 1: Clean the string
+        cleaned = (
+        series.astype(str)
+              .str.strip()
+              .replace(['-', '–', '—', ' - ', ' - ', '', 'nan', 'None'], '0', regex=False)
+              .replace('[\$,]', '', regex=True)
+    )
+    
+    # Step 2: Convert to float
+        cleaned = cleaned.astype(float)
+
+        # Step 3: Convert to int if needed
+        if force_int:
+            cleaned = cleaned.round().astype(int)
+
+        return cleaned
+    
+    # Apply cleaning to relevant columns
+    df_domo["Amount Spent"] = clean_numeric(df_domo["Amount Spent"])
+    df_domo["Impressions"] = clean_numeric(df_domo["Impressions"], force_int=True)
+    df_domo["CPC (Cost Per Click)"] = clean_numeric(df_domo["CPC (Cost Per Click)"])
+    df_domo["Leads"] = clean_numeric(df_domo["Leads"], force_int=True)
+
+    # Filter the Total row
+    total_row = df_domo[df_domo["Platform"] == "Total"]
+
+    # Pull each metric safely
+    amount_spent = total_row["Amount Spent"].values[0] if not total_row.empty else 0
+    impressions = total_row["Impressions"].values[0] if not total_row.empty else 0
+    cpc = total_row["CPC (Cost Per Click)"].values[0] if not total_row.empty else 0
+    leads = total_row["Leads"].values[0] if not total_row.empty else 0
+
+    # Display the metrics
+    col11, col12, col13, col14 = st.columns(4)
+    # col14, col15, col16 = st.columns(3)
+
+    with col11:
+        st.metric("Total Amount Spent", f"${amount_spent:,.2f}")
+
+    with col12:
+        st.metric("Total Impressions", f"{impressions:,}")
+
+    with col13:
+        st.metric("Average Cost Per Click", f"${cpc:.2f}")
+
+    with col14:
+        st.metric("Total Leads", f"{leads:,}")
+    df_domo.set_index("Platform", inplace=True)
+    st.dataframe(df_domo)
