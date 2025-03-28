@@ -333,6 +333,7 @@ with tab1:
 
     # Event Statistics
     total_sales = sum(ticket_sales) + group_signups + non_student_registrations + leads
+    print(total_sales)
     total_budget = 7000
     progress = (total_sales / total_budget) * 100
 
@@ -1045,7 +1046,9 @@ with tab4:
     #st.markdown(render_html_table(df_domo_subset), unsafe_allow_html=True)
     #st.dataframe(df_domo_subset, use_container_width=True)
     df_domo_subset = df_domo_subset[df_domo_subset.index != "Total"]
-    st.dataframe(df_domo_subset, use_container_width=True)
+    df_sorted = df_domo_subset.sort_values(by="Leads", ascending=False)
+    df_top8 = df_sorted.head(8)
+    st.dataframe(df_top8, use_container_width=True)
 
 
     # views_diff = eventbrite_views-previous_eventbrite_views
