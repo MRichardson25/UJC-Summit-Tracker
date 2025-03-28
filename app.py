@@ -63,15 +63,15 @@ def get_friday_token():
 #     st.success("Access Granted!")
 st.write("Welcome to the UJC Summit 2025 Dashboard!")
 
-tabs = ["Event Tracker", "Registration Leaderboard", "Repeat Registrants", "Paid Promotion Performance"]
+tabs = ["Event Tracker", "Registration Leaderboard", "Repeat Registrants", "Paid Promotions"]
 tab1, tab2, tab3, tab4 = st.tabs(tabs)
 
 # Sidebar instructions
 instructions = {
     "Event Tracker": "Track event registrations by date, location, and by type (student, ambassador referral, advisor referral).",
     "Registration Leaderboard": "View the top contributors and sources driving the most registrations.",
-    "Repeat Registrants": "View the number of individuals who registered for previous summits."
-    #"Paid Promotion Performance": "Analyze the impact of paid advertisements."
+    "Repeat Registrants": "View the number of individuals who registered for previous summits.",
+    "Paid Promotions": "View the performance of paid advertisement campaigns across Meta, Google, and LinkedIn."
 }
 st.sidebar.header("UJC Summit 2025 Tracker")
 st.sidebar.markdown("### Updated 12pm daily.")
@@ -182,7 +182,7 @@ else:
     order_data = st.secrets["TABLE_URL"]
 #order_data = os.getenv("TABLE_URL") #("Data/Eventbrite Attendees Table - 2025-3-24.csv")
 # Group survey form
-group_data = ("Data/Eventbrite Survey - group surv.csv")
+group_data = ("Data/Eventbrite Survey - Copy of group surv.csv")
 
 #Change here order may not be right for function!!!!!!
 group_signups, group_ambassador_registrations, ambassador_totals, group_dates, non_student_registrations, state_totals = process_attendance_data(group_data)
@@ -372,10 +372,10 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 5642
-    previous_eventbrite_views = 5282
+    eventbrite_views = 5919
+    previous_eventbrite_views = 5642
     df1_res, df4_res, df2_res, df3_res = 690, 237, 830, 178
-    df1_old, df4_old, df2_old, df3_old = 690, 235, 820, 176
+    df1_old, df4_old, df2_old, df3_old = 690, 237, 830, 178
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -897,6 +897,7 @@ with tab4:
     df_domo["Impressions"] = clean_numeric(df_domo["Impressions"], force_int=True)
     df_domo["CPC (Cost Per Click)"] = clean_numeric(df_domo["CPC (Cost Per Click)"])
     df_domo["Leads"] = clean_numeric(df_domo["Leads"], force_int=True)
+    df_domo["Clicks"] = clean_numeric(df_domo["Click"], force_int=True)
 
     # Filter the Total row
     total_row = df_domo[df_domo["Platform"] == "Total"]
@@ -906,21 +907,164 @@ with tab4:
     impressions = total_row["Impressions"].values[0] if not total_row.empty else 0
     cpc = total_row["CPC (Cost Per Click)"].values[0] if not total_row.empty else 0
     leads = total_row["Leads"].values[0] if not total_row.empty else 0
+    clicks = total_row["Clicks"].values[0] if not total_row.empty else 0
+    cpl = total_row["Cost Per Lead"].values[0] if not total_row.empty else 0
+
+    # Comparing to 9/25/2023 through 11/2/2023
+    num_2023_registrations = 1557
+    acpc_2023 = 14.27
+    acpc_2022 = 25
+    # acpc_2023_2025_diff = 
+    impress_2023 = 982089
+    spend_2023 = 22473.13
+    clicks_2023 = 16734
+
+    #target_ad_registrations = 
+    # Calculate percentage change
+    change_html_2023 = f'<p style="font-size: 14px; color: red; margin-top: -10px;">2023 Avg. Cost Per Lead: ${acpc_2023}</p>'
+    change_html_impresss = f'<p style="font-size: 14px; color: red; margin-top: -10px;">2023 Impressions: {impress_2023:,}</p>'
+    change_html_spend = f'<p style="font-size: 14px; color: red; margin-top: -10px;">2023 Spend: ${spend_2023:,}</p>'
+    change_html_clicks = f'<p style="font-size: 14px; color: red; margin-top: -10px;">2023 Clicks: {clicks_2023:,}</p>'
+    change_html_regist = f'<p style="font-size: 14px; color: red; margin-top: -10px;">2023 Ad Registrations: {num_2023_registrations:,}</p>'
+
 
     # Display the metrics
-    col11, col12, col13, col14 = st.columns(4)
+    col11, col12, col13, col14, col15 = st.columns(5)
     # col14, col15, col16 = st.columns(3)
-
     with col11:
-        st.metric("Total Amount Spent", f"${amount_spent:,.2f}")
+        # st.markdown(f'<div class="metric-box"><div class="title">Total Amount Spent</div><div class="number white">${amount_spent:,.2f}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">Total Amount Spent</div>
+                <div class="number white";">${amount_spent:,.2f}</div>
+                {change_html_spend}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
+    # with col3:
+    #     st.markdown(f'<div class="metric-box"><div class="title">Total Ambassador Registrations</div><div class="number orange">{num_amb_registered:,}</div></div>', unsafe_allow_html=True)
+
+    # with col11:
+    #     st.metric("Total Amount Spent", f"${amount_spent:,.2f}")
 
     with col12:
-        st.metric("Total Impressions", f"{impressions:,}")
-
+        # st.metric("Total Impressions", f"{impressions:,}")
+        # st.markdown(f'<div class="metric-box"><div class="title">Total Impressions</div><div class="number green">{impressions:,}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">Total Impressions</div>
+                <div class="number white";">{impressions:,}</div>
+                {change_html_impresss}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
     with col13:
-        st.metric("Average Cost Per Click", f"${cpc:.2f}")
+        # st.metric("Total Impressions", f"{impressions:,}")
+        # st.markdown(f'<div class="metric-box"><div class="title">Total Clicks</div><div class="number green">{clicks:,}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">Total Clicks</div>
+                <div class="number white";">{clicks:,}</div>
+                {change_html_clicks}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
+
 
     with col14:
-        st.metric("Total Leads", f"{leads:,}")
+        # st.metric("Total Leads", f"{leads:,}")
+        # st.markdown(f'<div class="metric-box"><div class="title">Total Registrations</div><div class="number white">{leads:,}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">Total Registrations</div>
+                <div class="number white";">{leads:,}</div>
+                {change_html_regist}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
+
+    with col15:
+        # st.metric("Average Cost Per Click", f"${cpc:.2f}")
+        # st.markdown(f'<div class="metric-box"><div class="title">Average Cost Per Click</div><div class="number red">${cpc:.2f}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'''
+            <div class="metric-box">
+                <div class="title">Avg. Cost Per Lead</div>
+                <div class="number white";">{cpl}</div>
+                {change_html_2023}  <!-- Inject percentage change here -->
+            </div>
+        ''', unsafe_allow_html=True)
+
+
     df_domo.set_index("Platform", inplace=True)
-    st.dataframe(df_domo)
+    # copy_df = 
+    # st.dataframe(df_domo)
+
+    def render_html_table(df):
+        # Convert all cells to strings so no inline styles are added
+        df_str = df.astype(str).reset_index()
+
+        html = """
+        <style>
+            table {
+                color: white;
+                background-color: #1e1e1e;
+                border-collapse: collapse;
+                width: 100%;
+                font-size: 26px;
+            }
+            th {
+                background-color: #333;
+                text-align: center;
+                padding: 10px;
+            }
+            td {
+                padding: 10px;
+                text-align: center;
+            }
+        </style>
+        """
+        #html += df_str.to_html(index=False, escape=False, border=0)
+        html += f'<div style="display: flex; justify-content: center;">{df_str.to_html(index=False, escape=False, border=0)}</div>'
+        return html
+
+
+    subset_cols = [
+    "Amount Spent",
+    "Impressions",
+    "Click",
+    "CPC (Cost Per Click)",
+    "Leads",
+    "Cost Per Lead"]
+
+    df_domo_subset = df_domo[subset_cols]
+    df_domo_subset["Cost Per Lead"] = df_domo_subset["Cost Per Lead"].apply(
+    lambda x: f"${float(x):,.2f}" if pd.notnull(x) and isinstance(x, (int, float)) else x)
+
+    df_domo_subset["Amount Spent"] = df_domo_subset["Amount Spent"].apply(
+        lambda x: f"${float(x):,.2f}" if pd.notnull(x) and isinstance(x, (int, float)) else x)
+
+    #st.markdown(render_html_table(df_domo_subset), unsafe_allow_html=True)
+    #st.dataframe(df_domo_subset, use_container_width=True)
+    df_domo_subset = df_domo_subset[df_domo_subset.index != "Total"]
+    st.dataframe(df_domo_subset, use_container_width=True)
+
+
+    # views_diff = eventbrite_views-previous_eventbrite_views
+    # # Calculate percentage change
+    # if previous_eventbrite_views > 0:
+    #     percentage_change = ((eventbrite_views - previous_eventbrite_views) / previous_eventbrite_views) * 100
+    # else:
+    #     percentage_change = 0  # Avoid division by zero
+
+    # # Determine color and symbol for percentage change
+    # if percentage_change > 0:
+    #     change_html = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {views_diff}, ({percentage_change:.1f}%) from yesterday</p>'
+    # elif percentage_change < 0:
+    #     change_html = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {views_diff} ({abs(percentage_change):.2f}%) from yesterday</p>'
+    # else:
+    #     change_html = '<p style="font-size: 14px; color: gray; margin-top: -10px;">No change from yesterday</p>'
+
+    # with col5:
+    #     st.markdown(f'''
+    #         <div class="metric-box">
+    #             <div class="title">Eventbrite Page Views</div>
+    #             <div class="number" style="color: #20D6D3;">{eventbrite_views:,}</div>
+    #             {change_html}  <!-- Inject percentage change here -->
+    #         </div>
+    #     ''', unsafe_allow_html=True)
