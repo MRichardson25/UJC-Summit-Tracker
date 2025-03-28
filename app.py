@@ -989,10 +989,10 @@ with tab4:
         st.markdown(f'''
             <div class="metric-box">
                 <div class="title">Avg. Cost Per Lead</div>
-                <div class="number white";">{cpl}</div>
+                <div class="number white";">${8.83}</div> 
                 {change_html_2023}  <!-- Inject percentage change here -->
             </div>
-        ''', unsafe_allow_html=True)
+        ''', unsafe_allow_html=True) #cpl instead of 8.83
 
 
     df_domo.set_index("Platform", inplace=True)
