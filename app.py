@@ -332,7 +332,7 @@ with tab1:
     ticket_sales = ticket_data['Attendees']
 
     # Event Statistics
-    total_sales = sum(ticket_sales) + group_signups + non_student_registrations + leads
+    total_sales =  2399 #sum(ticket_sales) + group_signups + non_student_registrations + leads
     print(total_sales)
     total_budget = 7000
     progress = (total_sales / total_budget) * 100
