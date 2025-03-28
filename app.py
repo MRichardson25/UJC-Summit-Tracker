@@ -22,6 +22,48 @@ def get_friday_token():
         return today.strftime("%Y-%m-%d")
     else:
         return "no-refresh"
+    
+load_dotenv() 
+url_1 = os.getenv("DROPBOX_URL")
+def get_cached_data(url):
+    return pd.read_csv(url)
+df_domo = get_cached_data(url_1)
+# Define a helper to clean numeric columns
+def clean_numeric(series, force_int=False):
+# Step 1: Clean the string
+    cleaned = (
+    series.astype(str)
+            .str.strip()
+            .replace(['-', '–', '—', ' - ', ' - ', '', 'nan', 'None'], '0', regex=False)
+            .replace('[\$,]', '', regex=True)
+)
+
+# Step 2: Convert to float
+    cleaned = cleaned.astype(float)
+
+    # Step 3: Convert to int if needed
+    if force_int:
+        cleaned = cleaned.round().astype(int)
+
+    return cleaned
+
+# Apply cleaning to relevant columns
+df_domo["Amount Spent"] = clean_numeric(df_domo["Amount Spent"])
+df_domo["Impressions"] = clean_numeric(df_domo["Impressions"], force_int=True)
+df_domo["CPC (Cost Per Click)"] = clean_numeric(df_domo["CPC (Cost Per Click)"])
+df_domo["Leads"] = clean_numeric(df_domo["Leads"], force_int=True)
+df_domo["Clicks"] = clean_numeric(df_domo["Click"], force_int=True)
+
+# Filter the Total row
+total_row = df_domo[df_domo["Platform"] == "Total"]
+
+# Pull each metric safely
+amount_spent = total_row["Amount Spent"].values[0] if not total_row.empty else 0
+impressions = total_row["Impressions"].values[0] if not total_row.empty else 0
+cpc = total_row["CPC (Cost Per Click)"].values[0] if not total_row.empty else 0
+leads = total_row["Leads"].values[0] if not total_row.empty else 0
+clicks = total_row["Clicks"].values[0] if not total_row.empty else 0
+cpl = total_row["Cost Per Lead"].values[0] if not total_row.empty else 0
 
 # # Cache the Domo pull, but only refresh on Fridays
 # @st.cache_data
@@ -290,7 +332,7 @@ with tab1:
     ticket_sales = ticket_data['Attendees']
 
     # Event Statistics
-    total_sales = sum(ticket_sales) + group_signups + non_student_registrations
+    total_sales = sum(ticket_sales) + group_signups + non_student_registrations + leads
     total_budget = 7000
     progress = (total_sales / total_budget) * 100
 
@@ -374,7 +416,7 @@ with tab1:
     # EVENTBRITE VIEW COUNT (MANUAL)
     eventbrite_views = 5919
     previous_eventbrite_views = 5642
-    df1_res, df4_res, df2_res, df3_res = 690, 237, 830, 178
+    df1_res, df4_res, df2_res, df3_res = 690, 238, 833, 178
     df1_old, df4_old, df2_old, df3_old = 690, 237, 830, 178
 
     # PREVIOUS ATTENDEE COUNT
@@ -865,50 +907,11 @@ with tab3:
 
 
 with tab4:
-    st.write("[Work In Progress]")
+    # st.write("[Work In Progress]")
     # df_domo = pd.DataFrame(data_domo)
     # st.dataframe(df_domo)
-    load_dotenv() 
-    url_1 = os.getenv("DROPBOX_URL")
-    def get_cached_data(url):
-        return pd.read_csv(url)
-    df_domo = get_cached_data(url_1)
-    # Define a helper to clean numeric columns
-    def clean_numeric(series, force_int=False):
-    # Step 1: Clean the string
-        cleaned = (
-        series.astype(str)
-              .str.strip()
-              .replace(['-', '–', '—', ' - ', ' - ', '', 'nan', 'None'], '0', regex=False)
-              .replace('[\$,]', '', regex=True)
-    )
     
-    # Step 2: Convert to float
-        cleaned = cleaned.astype(float)
 
-        # Step 3: Convert to int if needed
-        if force_int:
-            cleaned = cleaned.round().astype(int)
-
-        return cleaned
-    
-    # Apply cleaning to relevant columns
-    df_domo["Amount Spent"] = clean_numeric(df_domo["Amount Spent"])
-    df_domo["Impressions"] = clean_numeric(df_domo["Impressions"], force_int=True)
-    df_domo["CPC (Cost Per Click)"] = clean_numeric(df_domo["CPC (Cost Per Click)"])
-    df_domo["Leads"] = clean_numeric(df_domo["Leads"], force_int=True)
-    df_domo["Clicks"] = clean_numeric(df_domo["Click"], force_int=True)
-
-    # Filter the Total row
-    total_row = df_domo[df_domo["Platform"] == "Total"]
-
-    # Pull each metric safely
-    amount_spent = total_row["Amount Spent"].values[0] if not total_row.empty else 0
-    impressions = total_row["Impressions"].values[0] if not total_row.empty else 0
-    cpc = total_row["CPC (Cost Per Click)"].values[0] if not total_row.empty else 0
-    leads = total_row["Leads"].values[0] if not total_row.empty else 0
-    clicks = total_row["Clicks"].values[0] if not total_row.empty else 0
-    cpl = total_row["Cost Per Lead"].values[0] if not total_row.empty else 0
 
     # Comparing to 9/25/2023 through 11/2/2023
     num_2023_registrations = 1557
