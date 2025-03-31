@@ -332,8 +332,7 @@ with tab1:
     ticket_sales = ticket_data['Attendees']
 
     # Event Statistics
-    total_sales =  2399 #sum(ticket_sales) + group_signups + non_student_registrations + leads
-    print(total_sales)
+    total_sales =  sum(ticket_sales) + group_signups + non_student_registrations + leads
     total_budget = 7000
     progress = (total_sales / total_budget) * 100
 
@@ -347,7 +346,6 @@ with tab1:
     ### <span style='color: orange; font-weight: bold;'>{days_until_event}</span> days until UJC Summit 2025! 🎉
     """, unsafe_allow_html=True)
 
-
     st.title("🎟️ Event Tracker Dashboard")
 
     col1, col2 = st.columns([0.8, 0.2])
@@ -357,7 +355,10 @@ with tab1:
     with col2:
         st.metric("Registration Goal", f"{total_budget:,.0f}")
         st.text(f"Progress: {progress:.2f}% achieved")
-
+    
+    st.write(f"Group Signup Form Registrations: {group_signups:,}")
+    st.write(f"Advertisement Registrations: {leads:,}")
+    st.write(f"Eventbrite Registrations: {sum(ticket_sales):,}")
     # Ensure "Order Date" is in datetime format
     df_survey["Order Date"] = pd.to_datetime(df_survey["Order Date"], utc=True)
     df_survey["Order Date"] = df_survey["Order Date"].dt.tz_localize(None)  # Remove timezone info
@@ -374,7 +375,7 @@ with tab1:
 
     # Sum up values from both sources
     merged_dates["Total Registrations"] = merged_dates["Count"] + merged_dates["Total Attendees"]
-
+    
     # Keep only necessary columns
     merged_dates = merged_dates[["Order Date", "Total Registrations"]]
 
@@ -415,10 +416,15 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 5919
-    previous_eventbrite_views = 5642
-    df1_res, df4_res, df2_res, df3_res = 690, 238, 833, 178
-    df1_old, df4_old, df2_old, df3_old = 690, 237, 830, 178
+    eventbrite_views = 6127
+    previous_eventbrite_views = 5919
+    #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
+    load_dotenv() 
+    data_2022 = os.getenv("DATA_2022")
+    data_2023 = os.getenv("DATA_2023")
+    #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
+    df1_res, df4_res, df2_res, df3_res = 690,239,844,179
+    df1_old, df4_old, df2_old, df3_old = 690, 238, 833, 178
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -467,7 +473,7 @@ with tab1:
 
     # Create columns for metrics
     col2, col3, col4, col5 = st.columns(4)
-    #s_r = 
+    
     with col2:
         st.markdown(f'<div class="metric-box"><div class="title">Students Registered</div><div class="number pink">{students_registered+group_signups:,}</div></div>', unsafe_allow_html=True)
 
@@ -800,7 +806,7 @@ with tab3:
     col_6, col_7, col_8, col_9 = st.columns(4)
 
     # Define old and new values
-
+    #int(df1_res,df4_res,df2_res,)
     # Create dictionaries for iteration
     old_values = {'df1': df1_old, 'df4': df4_old, 'df2': df2_old, 'df3': df3_old}
     new_values = {'df1': df1_res, 'df4': df4_res, 'df2': df2_res, 'df3': df3_res}
@@ -912,7 +918,7 @@ with tab4:
     # df_domo = pd.DataFrame(data_domo)
     # st.dataframe(df_domo)
     
-
+    st.header("Registration Campaign Overview")
 
     # Comparing to 9/25/2023 through 11/2/2023
     num_2023_registrations = 1557
@@ -988,13 +994,16 @@ with tab4:
         # st.markdown(f'<div class="metric-box"><div class="title">Average Cost Per Click</div><div class="number red">${cpc:.2f}</div></div>', unsafe_allow_html=True)
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">Avg. Cost Per Lead</div>
+                <div class="title">Avg. Cost Per Lead*</div>
                 <div class="number white";">${8.83}</div> 
                 {change_html_2023}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True) #cpl instead of 8.83
 
-
+    df_domo['Platform'] = df_domo['Platform'].replace({
+    'Facebook': 'Facebook (Awareness Focused)',
+    'Instagram': 'Instagram (Awareness Focused)'
+})
     df_domo.set_index("Platform", inplace=True)
     # copy_df = 
     # st.dataframe(df_domo)
@@ -1031,7 +1040,7 @@ with tab4:
     subset_cols = [
     "Amount Spent",
     "Impressions",
-    "Click",
+    "Clicks",
     "CPC (Cost Per Click)",
     "Leads",
     "Cost Per Lead"]
@@ -1047,8 +1056,9 @@ with tab4:
     #st.dataframe(df_domo_subset, use_container_width=True)
     df_domo_subset = df_domo_subset[df_domo_subset.index != "Total"]
     df_sorted = df_domo_subset.sort_values(by="Leads", ascending=False)
-    df_top8 = df_sorted.head(8)
+    df_top8 = df_sorted.head(9)
     st.dataframe(df_top8, use_container_width=True)
+    st.text("*Avg. Cost Per Lead measures campaigns/platforms solely focused on registrations, not awareness.")
 
 
     # views_diff = eventbrite_views-previous_eventbrite_views
