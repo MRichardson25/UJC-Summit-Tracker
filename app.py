@@ -224,7 +224,7 @@ else:
     order_data = st.secrets["TABLE_URL"]
 #order_data = os.getenv("TABLE_URL") #("Data/Eventbrite Attendees Table - 2025-3-24.csv")
 # Group survey form
-group_data = ("Data/Eventbrite Survey - Copy of group surv.csv")
+group_data = ("Data/Perm/Eventbrite Survey - Copy of group surv (1).csv")
 
 #Change here order may not be right for function!!!!!!
 group_signups, group_ambassador_registrations, ambassador_totals, group_dates, non_student_registrations, state_totals = process_attendance_data(group_data)
@@ -376,20 +376,30 @@ with tab1:
     # Sum up values from both sources
     merged_dates["Total Registrations"] = merged_dates["Count"] + merged_dates["Total Attendees"]
     
-    # Keep only necessary columns
-    merged_dates = merged_dates[["Order Date", "Total Registrations"]]
+    # --- Load ad_time from Google Sheet CSV (registrations only) ---
+    load_dotenv()
+    ad_time_path = os.getenv("ADOT")  # This must be a public .csv export URL
+    ad_time = pd.read_csv(ad_time_path)
 
-    # Create interactive line chart with customized hover text
-    fig = px.line(merged_dates, x="Order Date", y="Total Registrations", markers=True, 
+    # Clean ad_time columns and types
+    ad_time.columns = ad_time.columns.str.strip()
+    ad_time["Order Date"] = pd.to_datetime(ad_time["Order Date"]).dt.date
+    ad_time["Registrations"] = ad_time["Registrations"].fillna(0)
+
+    # --- Final merge: combine everything ---
+    final_df = pd.merge(merged_dates, ad_time, on="Order Date", how="outer").fillna(0)
+
+    # Update final total
+    final_df["Total Registrations"] += final_df["Registrations"]
+
+    # Only keep necessary columns
+    final_df = final_df[["Order Date", "Total Registrations"]].sort_values("Order Date")
+
+    # Plot
+    fig = px.line(final_df, x="Order Date", y="Total Registrations", markers=True,
                 title="Registrations Over Time (Daily)",
                 labels={"Order Date": "Date", "Total Registrations": "Total Registrations"},
                 template="plotly_white")
-
-    # Customize the hover text
-    fig.update_traces(
-        hovertemplate="Registrations: %{y}<extra></extra>",
-        mode="lines+markers"
-    )
 
     fig.update_layout(
         xaxis_tickangle=-45,
@@ -416,36 +426,39 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 6270
-    previous_eventbrite_views = 6127
+    eventbrite_views = 6459
+    previous_eventbrite_views = 6270
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,241,849,179
-    df1_old, df4_old, df2_old, df3_old = 690,239,844,179
+    df1_res, df4_res, df2_res, df3_res = 690,243,855,181
+    df1_old, df4_old, df2_old, df3_old = 690,241,849,179
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
-    "attended", "previous", "past", "last year", "2024", "inauguration", "inaugural", 
-    "1st", "first", "2023", "2022", "December 2023", "Dec 2023", "participated", "participate"]
+    "email","Via email","email list","email list","mailing list","direct email","email blast","emailed"] #"Roc","Roc Nation","RocNation","rocnation","Rocnation", "ROC Nation","ROC nation","ujc",
     
     exclude_words = ["colleague", "friend", "aware"]
 
 # Function to check if a response should be included
-    # def should_include(response):
-    #     response_lower = response.lower() if isinstance(response, str) else ""
+    def should_include(response):
+        response_lower = response.lower() if isinstance(response, str) else ""
         
-    #     # Check if any include word is present
-    #     if any(word in response_lower for word in include_words):
-    #         # Ensure no exclude words are present
-    #         if not any(word in response_lower for word in exclude_words):
-    #             return True
-    #     return False
-    # filtered_prev_attendees = df_survey[df_survey["If you answered \"Other\" to the. previous question -"].apply(should_include)]
-    # prev_attendee_response = len(filtered_prev_attendees)
-    # #st.table(filtered_prev_attendees)
+        # Check if any include word is present
+        if any(word in response_lower for word in include_words):
+            # Ensure no exclude words are present
+            if not any(word in response_lower for word in exclude_words):
+                return True
+        return False
+    # filtered_prev_attendees = advisor_counts[(advisor_counts["Response"] != "No") & (advisor_counts["Response"] != "nan")]
+    test_3 = df_survey[df_survey["If you answered \"Other\" to the. previous question -"].apply(should_include) & df_survey["Did a UJC Ambassador Invite you to the Summit?"]]
+    filtered_prev_attendees = df_survey[df_survey["If you answered \"Other\" to the. previous question -"].apply(should_include)]
+    prev_attendee_response = len(filtered_prev_attendees)
+    test_4 = len(test_3)
+    print(test_4)
+    #st.table(filtered_prev_attendees)
 
     custom_css = """
     <style>
@@ -478,7 +491,7 @@ with tab1:
         st.markdown(f'<div class="metric-box"><div class="title">Students Registered</div><div class="number pink">{students_registered+group_signups:,}</div></div>', unsafe_allow_html=True)
 
     with col3:
-        st.markdown(f'<div class="metric-box"><div class="title">Total Ambassador Registrations</div><div class="number orange">{num_amb_registered:,}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-box"><div class="title">Total Ambassador Registrations</div><div class="number orange">{num_amb_registered+test_4:,}</div></div>', unsafe_allow_html=True)
 
     with col4:
         st.markdown(f'<div class="metric-box"><div class="title">Total Advisor Registrations</div><div class="number" style="color: #FEC110;">{num_adv_registered:,}</div></div>', unsafe_allow_html=True)
