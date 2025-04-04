@@ -28,6 +28,7 @@ url_1 = os.getenv("DROPBOX_URL")
 def get_cached_data(url):
     return pd.read_csv(url)
 df_domo = get_cached_data(url_1)
+df_domo2 = df_domo.copy()
 # Define a helper to clean numeric columns
 def clean_numeric(series, force_int=False):
 # Step 1: Clean the string
@@ -426,15 +427,15 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 6459
-    previous_eventbrite_views = 6270
+    eventbrite_views = 6912
+    previous_eventbrite_views = 6459
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,243,855,181
-    df1_old, df4_old, df2_old, df3_old = 690,241,849,179
+    df1_res, df4_res, df2_res, df3_res = 690,243,862,181
+    df1_old, df4_old, df2_old, df3_old = 690,243,855,181
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -1003,12 +1004,22 @@ with tab4:
         ''', unsafe_allow_html=True)
 
     with col15:
+        filtered_df = df_domo2[~df_domo2['Platform'].isin(['Facebook', 'Instagram'])]
+        filtered_df['Cost Per Lead'] = filtered_df['Cost Per Lead'].str.replace('$', '', regex=False)  # remove all dollar signs
+        filtered_df['Cost Per Lead'] = filtered_df['Cost Per Lead'].str.replace(',', '')               # remove commas
+        filtered_df['Cost Per Lead'] = filtered_df['Cost Per Lead'].str.extract('(\d+\.?\d*)')          # extract the first valid number from each string
+        filtered_df['Cost Per Lead'] = pd.to_numeric(filtered_df['Cost Per Lead'], errors='coerce') 
+        # Calculate the average cost
+        average_cost = filtered_df['Cost Per Lead'].mean()
+
+
+
         # st.metric("Average Cost Per Click", f"${cpc:.2f}")
         # st.markdown(f'<div class="metric-box"><div class="title">Average Cost Per Click</div><div class="number red">${cpc:.2f}</div></div>', unsafe_allow_html=True)
         st.markdown(f'''
             <div class="metric-box">
                 <div class="title">Avg. Cost Per Lead*</div>
-                <div class="number white";">${8.83}</div> 
+                <div class="number white";">${average_cost:,.2f}</div> 
                 {change_html_2023}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True) #cpl instead of 8.83
