@@ -427,15 +427,15 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 6912
-    previous_eventbrite_views = 6459
+    eventbrite_views = 7471
+    previous_eventbrite_views = 6912
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,243,862,181
-    df1_old, df4_old, df2_old, df3_old = 690,243,855,181
+    df1_res, df4_res, df2_res, df3_res = 690,247,873,184
+    df1_old, df4_old, df2_old, df3_old = 690,243,862,181
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -667,6 +667,41 @@ with tab1:
 
         # Show chart in Streamlit
         st.plotly_chart(fig, use_container_width=True)
+    
+    st.divider()
+    load_dotenv()
+    ujc_social_act = os.getenv("SOCIAL_ACTIVITY")  # This must be a public .csv export URL
+    ujcactivity = pd.read_csv(ujc_social_act)
+
+    def split_totals(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Splits the DataFrame into two:
+        - One without any 'Total' in the 'Group' column
+        - One with only rows that have 'Total' in the 'Group' column
+        
+        Parameters:
+        - df (pd.DataFrame): The original DataFrame
+        
+        Returns:
+        - (non_totals_df, totals_df): Tuple of filtered DataFrames
+        """
+        totals_df = df[df['Group'].str.contains("Total", case=False, na=False)]
+        non_totals_df = df[~df['Group'].str.contains("Total", case=False, na=False)]
+        return non_totals_df, totals_df
+    
+    
+    #st.title("Overview of Group Social Activity - Totals")
+    
+    #st.dataframe(totals_act, use_container_width=True)
+    # UNCOMMENT FOR GROUP SOCIAL ACTIVITY
+    # non_totals, totals_act = split_totals(ujcactivity)
+    # st.markdown("<h1 style='color: #4169E1;'>Overview of Group Social Activity - Totals</h1>", unsafe_allow_html=True)
+    # clean_act = totals_act.drop(columns=["Link"]).reset_index(drop=True)
+    # clean_act.index = [""] * len(clean_act)  # Set blank index
+    # st.dataframe(clean_act, use_container_width=True)
+    # st.markdown("<h1 style='color: #DC143C;'>All Group Social Activity - Individual Posts</h1>", unsafe_allow_html=True)
+    # st.dataframe(non_totals, use_container_width=True)
+
 with tab2:
 
     col_r_3, col_r_4 = st.columns([2, 1])
