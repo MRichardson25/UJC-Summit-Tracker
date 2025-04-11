@@ -401,7 +401,10 @@ with tab1:
                 title="Registrations Over Time (Daily)",
                 labels={"Order Date": "Date", "Total Registrations": "Total Registrations"},
                 template="plotly_white")
-
+    
+    fig.update_traces(
+    hovertemplate='Registration: %{y}<extra></extra>'
+)
     fig.update_layout(
         xaxis_tickangle=-45,
         hovermode="x unified"
@@ -427,15 +430,15 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 7876
-    previous_eventbrite_views = 7471
+    eventbrite_views = 8441
+    previous_eventbrite_views = 7876
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,247,882,184
-    df1_old, df4_old, df2_old, df3_old = 690,247,873,184
+    df1_res, df4_res, df2_res, df3_res = 690,250,892,185
+    df1_old, df4_old, df2_old, df3_old = 690,247,882,184
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -1115,10 +1118,9 @@ with tab4:
     #st.dataframe(df_domo_subset, use_container_width=True)
     df_domo_subset = df_domo_subset[df_domo_subset.index != "Total"]
     df_sorted = df_domo_subset.sort_values(by="Leads", ascending=False)
-    df_top8 = df_sorted.head(9)
-    st.dataframe(df_top8, use_container_width=True)
+    df_top8 = df_sorted.head(11)
+    st.dataframe(df_top8, use_container_width=True, height=420)
     st.text("*Avg. Cost Per Lead measures campaigns/platforms solely focused on registrations, not awareness.")
-
 
     # views_diff = eventbrite_views-previous_eventbrite_views
     # # Calculate percentage change
