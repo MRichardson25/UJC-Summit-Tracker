@@ -1118,7 +1118,7 @@ with tab4:
     #st.dataframe(df_domo_subset, use_container_width=True)
     df_domo_subset = df_domo_subset[df_domo_subset.index != "Total"]
     df_sorted = df_domo_subset.sort_values(by="Leads", ascending=False)
-    df_top8 = df_sorted.head(11)
+    df_top8 = df_sorted.head(12)
     st.dataframe(df_top8, use_container_width=True, height=420)
     st.text("*Avg. Cost Per Lead measures campaigns/platforms solely focused on registrations, not awareness.")
 
