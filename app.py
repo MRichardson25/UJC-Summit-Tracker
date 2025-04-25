@@ -225,7 +225,7 @@ else:
     order_data = st.secrets["TABLE_URL"]
 #order_data = os.getenv("TABLE_URL") #("Data/Eventbrite Attendees Table - 2025-3-24.csv")
 # Group survey form
-group_data = ("Data/Perm/Eventbrite Survey - Copy of group surv (1).csv")
+group_data = ("Data/Perm/Eventbrite Survey - Copy of group surv (2).csv")
 
 #Change here order may not be right for function!!!!!!
 group_signups, group_ambassador_registrations, ambassador_totals, group_dates, non_student_registrations, state_totals = process_attendance_data(group_data)
@@ -333,7 +333,7 @@ with tab1:
     ticket_sales = ticket_data['Attendees']
 
     # Event Statistics
-    total_sales =   2647 + group_signups + non_student_registrations + leads #
+    total_sales = sum(ticket_sales) + group_signups + non_student_registrations + leads #2647
     total_budget = 7000
     progress = (total_sales / total_budget) * 100
 
@@ -359,7 +359,7 @@ with tab1:
     
     st.write(f"Group Signup Form Registrations: {group_signups:,}")
     st.write(f"Advertisement Registrations: {leads:,}")
-    st.write(f"Eventbrite Registrations: 2647")#{sum(ticket_sales):,}
+    st.write(f"Eventbrite Registrations: {sum(ticket_sales):,}")#Eventbrite Registrations: 2,647
     # Ensure "Order Date" is in datetime format
     df_survey["Order Date"] = pd.to_datetime(df_survey["Order Date"], utc=True)
     df_survey["Order Date"] = df_survey["Order Date"].dt.tz_localize(None)  # Remove timezone info
@@ -430,15 +430,15 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 9865
-    previous_eventbrite_views = 9835
+    eventbrite_views = 10852
+    previous_eventbrite_views = 9865
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,255,910,189
-    df1_old, df4_old, df2_old, df3_old = 690,252,908,187
+    df1_res, df4_res, df2_res, df3_res = 690,262,926,194
+    df1_old, df4_old, df2_old, df3_old = 690,255,910,189
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -697,13 +697,13 @@ with tab1:
     
     # st.dataframe(totals_act, use_container_width=True)
     #UNCOMMENT FOR GROUP SOCIAL ACTIVITY
-    non_totals, totals_act = split_totals(ujcactivity)
-    st.markdown("<h1 style='color: #4169E1;'>Overview of Group Social Activity - Totals</h1>", unsafe_allow_html=True)
-    clean_act = totals_act.drop(columns=["Link"]).reset_index(drop=True)
-    clean_act.index = [""] * len(clean_act)  # Set blank index
-    st.dataframe(clean_act, use_container_width=True)
-    st.markdown("<h1 style='color: #DC143C;'>All Group Social Activity - Individual Posts</h1>", unsafe_allow_html=True)
-    st.dataframe(non_totals, use_container_width=True)
+    # non_totals, totals_act = split_totals(ujcactivity)
+    # st.markdown("<h1 style='color: #4169E1;'>Overview of Group Social Activity - Totals</h1>", unsafe_allow_html=True)
+    # clean_act = totals_act.drop(columns=["Link"]).reset_index(drop=True)
+    # clean_act.index = [""] * len(clean_act)  # Set blank index
+    # st.dataframe(clean_act, use_container_width=True)
+    # st.markdown("<h1 style='color: #DC143C;'>All Group Social Activity - Individual Posts</h1>", unsafe_allow_html=True)
+    # st.dataframe(non_totals, use_container_width=True)
 
 with tab2:
 
