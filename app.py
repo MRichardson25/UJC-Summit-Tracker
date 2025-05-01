@@ -430,15 +430,15 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 10852
-    previous_eventbrite_views = 9865
+    eventbrite_views = 12147
+    previous_eventbrite_views = 10852
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,262,926,194
-    df1_old, df4_old, df2_old, df3_old = 690,255,910,189
+    df1_res, df4_res, df2_res, df3_res = 690,264,940,194
+    df1_old, df4_old, df2_old, df3_old = 690,262,926,194
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -1028,7 +1028,6 @@ with tab4:
                 {change_html_clicks}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True)
-
 
     with col14:
         # st.metric("Total Leads", f"{leads:,}")
