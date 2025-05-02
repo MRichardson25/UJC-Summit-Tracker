@@ -495,7 +495,7 @@ with tab1:
         st.markdown(f'<div class="metric-box"><div class="title">Students Registered</div><div class="number pink">{students_registered+group_signups:,}</div></div>', unsafe_allow_html=True)
 
     with col3:
-        st.markdown(f'<div class="metric-box"><div class="title">Ambassado Driven Registrations</div><div class="number orange">{num_amb_registered+test_4:,}</div></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-box"><div class="title">Ambassador Driven Registrations</div><div class="number orange">{num_amb_registered+test_4:,}</div></div>', unsafe_allow_html=True)
 
     with col4:
         st.markdown(f'<div class="metric-box"><div class="title">Advisor Driven Registrations</div><div class="number" style="color: #FEC110;">{num_adv_registered:,}</div></div>', unsafe_allow_html=True)
