@@ -509,9 +509,9 @@ with tab1:
 
     # Determine color and symbol for percentage change
     if percentage_change > 0:
-        change_html = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {views_diff}, ({percentage_change:.1f}%) from yesterday</p>'
+        change_html = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {views_diff}, ({percentage_change:.1f}%) from last week</p>'
     elif percentage_change < 0:
-        change_html = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {views_diff} ({abs(percentage_change):.2f}%) from yesterday</p>'
+        change_html = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {views_diff} ({abs(percentage_change):.2f}%) from last week</p>'
     else:
         change_html = '<p style="font-size: 14px; color: gray; margin-top: -10px;">No change from yesterday</p>'
 
