@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 # from st_aggrid.shared import GridUpdateMode
 from dotenv import load_dotenv
 from pydomo import Domo
+import plotly.graph_objects as go
 
 # Set page config
 st.set_page_config(page_title="UJC Summit Registration Tracker Dashboard", layout="wide")
@@ -356,12 +357,8 @@ with tab1:
     with col2:
         st.metric("Registration Goal", f"{total_budget:,.0f}")
         st.text(f"Progress: {progress:.2f}% achieved")
-    
-    st.write(f"Group Signup Form Registrations: {group_signups:,}")
-    st.write(f"Advertisement Registrations: {leads:,}")
-    st.write(f"Eventbrite Registrations: {sum(ticket_sales):,}")#Eventbrite Registrations: 2,647
-    # Ensure "Order Date" is in datetime format
-    df_survey["Order Date"] = pd.to_datetime(df_survey["Order Date"], utc=True)
+
+        df_survey["Order Date"] = pd.to_datetime(df_survey["Order Date"], utc=True)
     df_survey["Order Date"] = df_survey["Order Date"].dt.tz_localize(None)  # Remove timezone info
 
     # Extract only the date part (drop time)
@@ -395,7 +392,13 @@ with tab1:
 
     # Only keep necessary columns
     final_df = final_df[["Order Date", "Total Registrations"]].sort_values("Order Date")
-
+    average_daily_regs = int((final_df['Total Registrations'].mean()))
+    
+    st.write(f"Group Signup Form Registrations: {group_signups:,}")
+    st.write(f"Advertisement Registrations: {leads:,}")
+    st.write(f"Eventbrite Registrations: {sum(ticket_sales):,}")#Eventbrite Registrations: 2,647
+    st.write(f"Average Daily Registrations: <u>{average_daily_regs:,}</u>. Projected to gain {average_daily_regs*days_until_event:,} registrations by 5/30.",unsafe_allow_html=True)
+   
     # Plot
     fig = px.line(final_df, x="Order Date", y="Total Registrations", markers=True,
                 title="Registrations Over Time (Daily)",
@@ -410,6 +413,70 @@ with tab1:
         hovermode="x unified"
     )
     st.plotly_chart(fig, use_container_width=True)
+
+    # # Assume final_df is already defined and sorted by "Order Date"
+    # final_df["DoD Change"] = final_df["Total Registrations"].diff()
+    # fig_dod = px.line(final_df, x="Order Date", y="DoD Change", markers=True,
+    #                   title="Day-over-Day Change in Registrations",
+    #                   labels={"Order Date": "Date", "DoD Change": "Change"},
+    #                   template="plotly_white")
+    # fig_dod.update_traces(hovertemplate='Change: %{y}<extra></extra>')
+    # fig_dod.update_layout(xaxis_tickangle=-45, hovermode="x unified")
+    # st.plotly_chart(fig_dod, use_container_width=True)
+
+
+    # Compute DoD Change
+    final_df["DoD Change"] = final_df["Total Registrations"].diff()
+    final_df["Order Date"] = pd.to_datetime(final_df["Order Date"])
+    final_df = final_df[final_df["Order Date"] >= pd.to_datetime("2025-04-10")].reset_index(drop=True)
+    final_df = final_df.dropna().reset_index(drop=True)
+
+    # Determine label colors
+    label_colors = ['green' if val >= 0 else 'red' for val in final_df["DoD Change"]]
+
+    # Create base line chart
+    fig_dod = go.Figure()
+
+    fig_dod.add_trace(go.Scatter(
+        x=final_df["Order Date"],
+        y=final_df["DoD Change"],
+        mode="lines+markers+text",
+        line=dict(color="royalblue", width=2),
+        marker=dict(size=6, color="royalblue"),
+        text=[f"{val:.0f}" for val in final_df["DoD Change"]],
+        textposition="top center",
+        textfont=dict(color=label_colors),
+        name="DoD Change",
+        hovertemplate='Change: %{y}<extra></extra>'
+    ))
+
+    # Add horizontal reference line at y=0
+    fig_dod.add_shape(
+        type="line",
+        x0=final_df["Order Date"].min(),
+        x1=final_df["Order Date"].max(),
+        y0=0, y1=0,
+        line=dict(color="gray", width=1, dash="dash")
+    )
+
+    # Layout
+    fig_dod.update_layout(
+        title="Day-over-Day Change in Registrations",
+        xaxis_title="Date",
+        yaxis_title="Change",
+        template="plotly_white",
+        hovermode="x unified",
+        xaxis_tickangle=-45
+    )
+
+    # Display
+    st.plotly_chart(fig_dod, use_container_width=True)
+
+
+
+
+
+
 
     # Define survey exclusion criteria
     invalid_entries = ["unknown", "no", "none", "n/a", "na", "NA", "nan"]
@@ -916,6 +983,8 @@ with tab3:
             # st.table(df1_res["Name"])
             #align_right_table(df1_res)  # Shift table position
 
+
+
     with col_7:
         if df4_change > 0:
             change_html2 = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {differences[1]} ({df4_change:.2f}%) from yesterday</p>'
@@ -964,6 +1033,43 @@ with tab3:
             </div>
         ''', unsafe_allow_html=True)
 
+# # Repeat registration matrix including 3-year repeats
+#     repeat_data = {
+#         "2022": [None, 690, None, None],
+#         "2023": [None, None, None, None],
+#         "2025": [265, 943, None, None],
+#         "All 3 Years": [None, None, None, 194]
+#     }
+#     repeat_df = pd.DataFrame(repeat_data, index=["2022", "2023", "2025", "All 3 Years"])
+#     repeat_df.index.name = "From Year"
+#     formatted_df = repeat_df.applymap(lambda x: int(x) if pd.notnull(x) else "-")
+#     st.dataframe(formatted_df, use_container_width=True)
+
+    # TABLE VIEW FOR REPEAT REGISTRATIONS
+    # repeat_data = {
+    #     "2022": [None, 690.0, None, None],
+    #     "2023": [None, None, None, None],
+    #     "2025": [265.0, 943.0, None, None],
+    #     "All 3 Years": [None, None, None, 194.0]
+    # }
+
+    # repeat_df = pd.DataFrame(repeat_data, index=["2022", "2023", "2025", "All 3 Years"])
+    # repeat_df.index.name = "From Year"
+
+    # # Format numbers and blanks
+    # formatted_df = repeat_df.applymap(lambda x: int(x) if pd.notnull(x) else " ")
+
+    # # Define styling function
+    # def highlight_dash(val):
+    #     if val == " ":
+    #         return "background-color: #3a3a3a; color: white"
+    #     return ""
+
+    # # Apply styling
+    # styled_df = formatted_df.style.applymap(highlight_dash)
+
+    # # Display styled dataframe
+    # st.dataframe(styled_df, use_container_width=True)
 
 with tab4:
     # st.write("[Work In Progress]")
