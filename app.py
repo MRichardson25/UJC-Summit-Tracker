@@ -392,12 +392,12 @@ with tab1:
 
     # Only keep necessary columns
     final_df = final_df[["Order Date", "Total Registrations"]].sort_values("Order Date")
-    average_daily_regs = int((final_df['Total Registrations'].mean()))
+    average_daily_regis = int((final_df['Total Registrations'].mean()))
     
     st.write(f"Group Signup Form Registrations: {group_signups:,}")
     st.write(f"Advertisement Registrations: {leads:,}")
     st.write(f"Eventbrite Registrations: {sum(ticket_sales):,}")#Eventbrite Registrations: 2,647
-    st.write(f"Average Daily Registrations: <u>{average_daily_regs:,}</u>. Projected to gain {average_daily_regs*days_until_event:,} registrations by 5/30.",unsafe_allow_html=True)
+    st.write(f"Average Daily Registrations: <u>{average_daily_regis:,}</u>. Projected to gain {average_daily_regis*days_until_event:,} registrations by 5/30.",unsafe_allow_html=True)
    
     # Plot
     fig = px.line(final_df, x="Order Date", y="Total Registrations", markers=True,
