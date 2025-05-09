@@ -226,7 +226,7 @@ else:
     order_data = st.secrets["TABLE_URL"]
 #order_data = os.getenv("TABLE_URL") #("Data/Eventbrite Attendees Table - 2025-3-24.csv")
 # Group survey form
-group_data = ("Data/Perm/Eventbrite Survey - Copy of group surv (2).csv")
+group_data = ("Data/Perm/Eventbrite Survey - Copy of group surv (3).csv")
 
 #Change here order may not be right for function!!!!!!
 group_signups, group_ambassador_registrations, ambassador_totals, group_dates, non_student_registrations, state_totals = process_attendance_data(group_data)
