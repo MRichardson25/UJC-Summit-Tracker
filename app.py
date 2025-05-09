@@ -497,15 +497,15 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 13023
-    previous_eventbrite_views = 12269
+    eventbrite_views = 14073
+    previous_eventbrite_views = 13023
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,265,943,194
-    df1_old, df4_old, df2_old, df3_old = 690,262,926,194
+    df1_res, df4_res, df2_res, df3_res = 690,276,962,197
+    df1_old, df4_old, df2_old, df3_old = 690,265,943,194
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -1070,6 +1070,42 @@ with tab3:
 
     # # Display styled dataframe
     # st.dataframe(styled_df, use_container_width=True)
+    st.divider()
+    #VENN DIAGRAM
+    # import streamlit as st
+    # from matplotlib_venn import venn3
+    # import matplotlib.pyplot as plt
+
+
+    # # Define your values
+    # # Format: (A only, B only, A&B only, C only, A&C only, B&C only, A&B&C)
+    # #2022 total registrations, 2023 total registrants, 22+23 reg, 2025 registrations, 22+25 reg, 23+25 reg, all 3)
+    # #row_count = df['Name'].count()
+   
+    # df_2022 = pd.read_csv(data_2022)
+    # df_2023 = pd.read_csv(data_2023)
+    # registraints_2022 = df_2022['Name'].count()
+    # registraints_2023 = df_2023['Name'].count()
+    # values = (registraints_2022, registraints_2023, 690, total_sales, df4_res, df2_res, df3_res)
+
+    # labels = ('2022', '2023', '2025')
+    # # Plotting
+    # fig11, ax11 = plt.subplots(figsize=(4, 4))
+    # # Set transparent background
+    # fig11.patch.set_alpha(0)  # entire figure background
+    # ax11.patch.set_alpha(0)   # axes background
+    # venn = venn3(subsets=values, set_labels=labels, ax=ax11)
+    # ax11.set_title("Total Registration and Repeat Registration Venn Diagram", color='white', fontsize=12)
+    # for text in venn.set_labels:
+    #     if text:  # sometimes None if a set has no label
+    #         text.set_color("white")
+    # for text in venn.subset_labels:
+    #     if text:
+    #         text.set_color("white")
+    # st.pyplot(fig11)
+    # col111, col222, col333 = st.columns([1, 2, 1])  # center the chart in column 2
+    # with col2:
+    #     st.pyplot(fig11)
 
 with tab4:
     # st.write("[Work In Progress]")
@@ -1227,26 +1263,3 @@ with tab4:
     st.dataframe(df_top8, use_container_width=True, height=420)
     st.text("*Avg. Cost Per Lead measures campaigns/platforms solely focused on registrations, not awareness.")
 
-    # views_diff = eventbrite_views-previous_eventbrite_views
-    # # Calculate percentage change
-    # if previous_eventbrite_views > 0:
-    #     percentage_change = ((eventbrite_views - previous_eventbrite_views) / previous_eventbrite_views) * 100
-    # else:
-    #     percentage_change = 0  # Avoid division by zero
-
-    # # Determine color and symbol for percentage change
-    # if percentage_change > 0:
-    #     change_html = f'<p style="font-size: 14px; color: green; margin-top: -10px;">▲ {views_diff}, ({percentage_change:.1f}%) from yesterday</p>'
-    # elif percentage_change < 0:
-    #     change_html = f'<p style="font-size: 14px; color: red; margin-top: -10px;">▼ {views_diff} ({abs(percentage_change):.2f}%) from yesterday</p>'
-    # else:
-    #     change_html = '<p style="font-size: 14px; color: gray; margin-top: -10px;">No change from yesterday</p>'
-
-    # with col5:
-    #     st.markdown(f'''
-    #         <div class="metric-box">
-    #             <div class="title">Eventbrite Page Views</div>
-    #             <div class="number" style="color: #20D6D3;">{eventbrite_views:,}</div>
-    #             {change_html}  <!-- Inject percentage change here -->
-    #         </div>
-    #     ''', unsafe_allow_html=True)
