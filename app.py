@@ -1140,7 +1140,7 @@ with tab4:
         st.markdown(f'''
             <div class="metric-box">
                 <div class="title">Total Amount Spent</div>
-                <div class="number white";">${amount_spent:,.2f}</div>
+                <div class="number white";">${amount_spent:,.0f}</div>
                 {change_html_spend}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True)
