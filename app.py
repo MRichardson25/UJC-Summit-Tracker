@@ -921,6 +921,52 @@ with tab3:
     #     st.markdown("<div style='text-align: right;'>", unsafe_allow_html=True)
     #     st.dataframe(df, height=150)
     #     st.markdown("</div>", unsafe_allow_html=True)
+    
+    #TOTAL REGISTRATIONS 
+    # df_2022 = pd.read_csv(data_2022)
+    # df_2023 = pd.read_csv(data_2023)
+    # registraints_2022 = df_2022['Name'].count()
+    # registraints_2023 = df_2023['Name'].count()
+    # #total_sales
+    # col101, col201, col301 = st.columns(3)
+
+    # with col101:
+    #     st.markdown(f'''
+    #         <div class="metric-box" style="text-align: center;">
+    #             <div class="title" style="font-weight: bold; color: white; font-size: 16px; margin-bottom: 6px;">
+    #                 Total 2022 Registrants
+    #             </div>
+    #             <div class="number" style="color: #FF4B8B; font-size: 40px; font-weight: bold;">
+    #                 {registraints_2022:,}
+    #             </div>
+    #         </div>
+    #     ''', unsafe_allow_html=True)
+
+    # with col201:
+    #     st.markdown(f'''
+    #         <div class="metric-box" style="text-align: center;">
+    #             <div class="title" style="font-weight: bold; color: white; font-size: 16px; margin-bottom: 6px;">
+    #                 Total 2023 Registrants
+    #             </div>
+    #             <div class="number" style="color: #F58F29; font-size: 40px; font-weight: bold;">
+    #                 {registraints_2023:,}
+    #             </div>
+    #         </div>
+    #     ''', unsafe_allow_html=True)
+
+    # with col301:
+    #     st.markdown(f'''
+    #         <div class="metric-box" style="text-align: center;">
+    #             <div class="title" style="font-weight: bold; color: white; font-size: 16px; margin-bottom: 6px;">
+    #                 Total 2025 Registrants
+    #             </div>
+    #             <div class="number" style="color: #00C6C2; font-size: 40px; font-weight: bold;">
+    #                 {total_sales:,}
+    #             </div>
+    #         </div>
+    #     ''', unsafe_allow_html=True)
+
+
 
     col_6, col_7, col_8, col_9 = st.columns(4)
 
@@ -1139,8 +1185,8 @@ with tab4:
         # st.markdown(f'<div class="metric-box"><div class="title">Total Amount Spent</div><div class="number white">${amount_spent:,.2f}</div></div>', unsafe_allow_html=True)
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">Total Amount Spent</div>
-                <div class="number white";">${amount_spent:,.0f}</div>
+                <div class="title">Amount Spent</div>
+                <div class="number white" style="font-size: 34px;">${amount_spent:,.0f}</div>
                 {change_html_spend}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True)
@@ -1155,8 +1201,8 @@ with tab4:
         # st.markdown(f'<div class="metric-box"><div class="title">Total Impressions</div><div class="number green">{impressions:,}</div></div>', unsafe_allow_html=True)
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">Total Impressions</div>
-                <div class="number white";">{impressions:,}</div>
+                <div class="title">Impressions</div>
+                <div class="number white" style="font-size: 34px;">{impressions:,}</div>
                 {change_html_impresss}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True)
@@ -1165,8 +1211,8 @@ with tab4:
         # st.markdown(f'<div class="metric-box"><div class="title">Total Clicks</div><div class="number green">{clicks:,}</div></div>', unsafe_allow_html=True)
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">Total Clicks</div>
-                <div class="number white";">{clicks:,}</div>
+                <div class="title">Clicks</div>
+                <div class="number white" style="font-size: 34px;">{clicks:,}</div>
                 {change_html_clicks}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True)
@@ -1176,8 +1222,8 @@ with tab4:
         # st.markdown(f'<div class="metric-box"><div class="title">Total Registrations</div><div class="number white">{leads:,}</div></div>', unsafe_allow_html=True)
         st.markdown(f'''
             <div class="metric-box">
-                <div class="title">Total Registrations</div>
-                <div class="number white";">{leads:,}</div>
+                <div class="title">Registrations</div>
+                <div class="number white" style="font-size: 34px;">{leads:,}</div>
                 {change_html_regist}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True)
@@ -1198,7 +1244,7 @@ with tab4:
         st.markdown(f'''
             <div class="metric-box">
                 <div class="title">Avg. Cost Per Lead*</div>
-                <div class="number white";">${average_cost:,.2f}</div> 
+                <div class="number white" style="font-size: 34px;">${average_cost:,.2f}</div> 
                 {change_html_2023}  <!-- Inject percentage change here -->
             </div>
         ''', unsafe_allow_html=True) #cpl instead of 8.83
