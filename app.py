@@ -504,8 +504,8 @@ with tab1:
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,276,962,197
-    df1_old, df4_old, df2_old, df3_old = 690,265,943,194
+    df1_res, df4_res, df2_res, df3_res = 690,276,969,197
+    df1_old, df4_old, df2_old, df3_old = 690,276,962,197
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
@@ -1117,7 +1117,7 @@ with tab3:
     # # Display styled dataframe
     # st.dataframe(styled_df, use_container_width=True)
     st.divider()
-    #VENN DIAGRAM
+    # #VENN DIAGRAM
     # import streamlit as st
     # from matplotlib_venn import venn3
     # import matplotlib.pyplot as plt
