@@ -472,12 +472,6 @@ with tab1:
     # Display
     st.plotly_chart(fig_dod, use_container_width=True)
 
-
-
-
-
-
-
     # Define survey exclusion criteria
     invalid_entries = ["unknown", "no", "none", "n/a", "na", "NA", "nan"]
 
