@@ -337,6 +337,7 @@ with tab1:
     total_sales = sum(ticket_sales) + group_signups + non_student_registrations + leads #2647
     total_budget = 7000
     progress = (total_sales / total_budget) * 100
+    print(total_sales)
 
     event_date = datetime(2025, 5, 30)  # Change to your event date
     # Get today's date
@@ -491,7 +492,7 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 16007
+    eventbrite_views = 16006
     previous_eventbrite_views = 14073
     #test change
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
