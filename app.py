@@ -493,6 +493,7 @@ with tab1:
     # EVENTBRITE VIEW COUNT (MANUAL)
     eventbrite_views = 16007
     previous_eventbrite_views = 14073
+    #test change
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
