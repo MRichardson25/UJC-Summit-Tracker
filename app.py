@@ -907,6 +907,8 @@ with tab2:
     col7, col8 = st.columns(2)
     
 with tab3:
+    st.text("The numbers below highlight how many registrants have attended past summits, to better understand returning participant trends and engagement with the summit over time.")
+
     #Function output reference to variables
     #duplicates_22_23, duplicates_23_25, duplicates_22_23_25, duplicates_22_25
     # df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
@@ -1002,7 +1004,6 @@ with tab3:
         percent_changes["df2_change"],
         percent_changes["df3_change"]
     )
-
     with col_6:
         # Determine color and symbol for percentage change
         if df1_change > 0:
