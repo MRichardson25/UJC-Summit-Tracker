@@ -492,8 +492,8 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 17094
-    previous_eventbrite_views = 16006
+    eventbrite_views = 18616
+    previous_eventbrite_views = 17094
     #test change
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
@@ -1114,7 +1114,7 @@ with tab3:
     # # Display styled dataframe
     # st.dataframe(styled_df, use_container_width=True)
     st.divider()
-    # #VENN DIAGRAM
+    #VENN DIAGRAM
     # import streamlit as st
     # from matplotlib_venn import venn3
     # import matplotlib.pyplot as plt
