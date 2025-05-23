@@ -354,7 +354,7 @@ with tab1:
     col1, col2 = st.columns([0.8, 0.2])
     with col1:
         st.metric("Total Ticket Sales", f"{total_sales:,.0f}")
-        st.progress(progress / 100)
+        st.progress(min(progress / 100, 1.0))  # caps at 100% for visual bar
     with col2:
         st.metric("Registration Goal", f"{total_budget:,.0f}")
         st.text(f"Progress: {progress:.2f}% achieved")
