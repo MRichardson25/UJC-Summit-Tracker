@@ -492,16 +492,16 @@ with tab1:
     # ADVISOR INVITE COUNT 
     num_adv_registered = filtered_advisor_counts["Count"].sum()
     # EVENTBRITE VIEW COUNT (MANUAL)
-    eventbrite_views = 18616
-    previous_eventbrite_views = 17094
+    eventbrite_views = 20106
+    previous_eventbrite_views = 18616
     #test change
     #df1_res, df2_res, df3_res, df4_res = process_and_calc_returners(data_2022,data_2023,survey_data)
     load_dotenv() 
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,281,998,200
-    df1_old, df4_old, df2_old, df3_old = 690,276,969,197
+    df1_res, df4_res, df2_res, df3_res = 690,287,1029,204
+    df1_old, df4_old, df2_old, df3_old = 690,281,998,200
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
