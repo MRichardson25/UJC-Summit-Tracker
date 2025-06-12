@@ -345,9 +345,9 @@ with tab1:
     # Calculate days remaining
     days_until_event = (event_date - today).days
 
-    st.markdown(f"""
+    #st.markdown(f"""
     ### <span style='color: orange; font-weight: bold;'>{days_until_event}</span> days until UJC Summit 2025! 🎉
-    """, unsafe_allow_html=True)
+    #""", unsafe_allow_html=True)
 
     st.title("🎟️ Event Tracker Dashboard")
 
@@ -398,7 +398,8 @@ with tab1:
     st.write(f"Group Signup Form Registrations: {group_signups:,}")
     st.write(f"Advertisement Registrations: {leads:,}")
     st.write(f"Eventbrite Registrations: {sum(ticket_sales):,}")#Eventbrite Registrations: 2,647
-    st.write(f"Average Daily Registrations: <u>{average_daily_regis:,}</u>. Projected to gain {average_daily_regis*days_until_event:,} registrations by 5/30.",unsafe_allow_html=True)
+    #st.write(f"Average Daily Registrations: <u>{average_daily_regis:,}</u>. Projected to gain {average_daily_regis*days_until_event:,} registrations by 5/30.",unsafe_allow_html=True)
+    st.write(f"Average Daily Total Registrations: {average_daily_regis:}")
    
     # Plot
     fig = px.line(final_df, x="Order Date", y="Total Registrations", markers=True,
@@ -500,8 +501,8 @@ with tab1:
     data_2022 = os.getenv("DATA_2022")
     data_2023 = os.getenv("DATA_2023")
     #df1_res, df4_res, df2_res, df3_res = process_and_calc_returners(data_2022,data_2023,survey_data)
-    df1_res, df4_res, df2_res, df3_res = 690,287,1029,204
-    df1_old, df4_old, df2_old, df3_old = 690,281,998,200
+    df1_res, df4_res, df2_res, df3_res = 690,297,1048,208
+    df1_old, df4_old, df2_old, df3_old = 690,287,1029,204
 
     # PREVIOUS ATTENDEE COUNT
     include_words = [
